@@ -1,2 +1,2 @@
-# Trabalho-Jogo-Programa-o
+# Trabalho-Jogo-Programa
 trabalho ufrgs programação
