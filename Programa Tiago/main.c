@@ -26,14 +26,16 @@
 #define ZUMBI 'Z'
 #define TROLL 'T'
 #define VAZIO ' '
+#define AURA '*'
 
-#define COR_PAREDE 0
-#define COR_OBSTACULO 3
-#define COR_JOGADOR 5
-#define COR_TESOURO 7
-#define COR_ZUMBI 9
-#define COR_TROLL 12
-#define COR_VAZIO 14
+#define COR_PAREDE 8
+#define COR_OBSTACULO 2
+#define COR_JOGADOR 9
+#define COR_TESOURO 14
+#define COR_ZUMBI 12
+#define COR_TROLL 16
+#define COR_VAZIO 7
+#define COR_AURA 15
 
 #define MAXIMODEMONSTROS1 15
 
@@ -78,7 +80,7 @@ void Menu(char *Selecaopont) // mostra menu e retorna resposta
     printf("\t(V) Voltar\n");
     do
         {
-        scanf(" %c", &Resposta);
+        Resposta = getch();
         Resposta=toupper(Resposta);
         }
     while(Resposta!='N' && Resposta!='C' && Resposta!='S' && Resposta!='Q' && Resposta!='V');
@@ -206,7 +208,7 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
 
     int I, X = 0, Y = 0;
     char Simbolo;
-    printf("\nVidas restantes: %d", Jogador->Vidas);
+    printf("\nVidas restantes: %d", Jogador->Vidas+1);
 
     for(I = 0; I < Quant; I++)
     {
@@ -279,6 +281,13 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
     }
 }
 
+void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador)
+{
+
+printf("teste");
+
+}
+
 void PintaMapa(char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas){   // imprime o mapa
     int X, Y, Cor;
     for(X=0; X<Colunas; X++){
@@ -303,6 +312,8 @@ void PintaMapa(char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas){   // 
                                     break;
 
                 case(VAZIO): Cor = COR_VAZIO;
+                                         break;
+                case(AURA): Cor = COR_AURA;
                                          break;
             }
             textbackground(Cor);
@@ -333,11 +344,11 @@ void  Execucao(int Mapa, int Vidas)
     timebegin = clock();
     timer = clock();
     srand(time(NULL));
-    Jogador.Vidas=Vidas;
+    Jogador.Vidas=Vidas-1;
 
     while(Jogador.Vidas > 0 && Colisao != 2)
     {
-        if(LerMapa("mapa1.txt", MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS1, &QuantInimigos, Inimigos, &Jogador))
+        if(LerMapa("mapa 1.txt", MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS1, &QuantInimigos, Inimigos, &Jogador))
         {
             PintaMapa(MapadoJogo, LINHAS, COLUNAS);
             HideCursor();
@@ -369,7 +380,7 @@ void  Execucao(int Mapa, int Vidas)
                     timer = clock();
                 }
                 switch(Tecla = toupper(Tecla))
-                {
+                {   case 'w':
                     case 'W': Move(MapadoJogo, &Jogador, 0, -1, &Controle);
                             break;
                     case 'A': Move(MapadoJogo, &Jogador, -1, 0, &Controle);
@@ -378,6 +389,7 @@ void  Execucao(int Mapa, int Vidas)
                             break;
                     case 'D': Move(MapadoJogo, &Jogador, +1, 0, &Controle);
                             break;
+                    case 'F': Aura(MapadoJogo, &Jogador);
                 }
                 PintaMapa(MapadoJogo, LINHAS, COLUNAS);
 
