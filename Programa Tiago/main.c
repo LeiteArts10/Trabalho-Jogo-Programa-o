@@ -78,12 +78,13 @@ void Menu(char *Selecaopont) // mostra menu e retorna resposta
     printf("\t(S) Salvar jogo\n");
     printf("\t(Q) Sair do jogo\n");
     printf("\t(V) Voltar\n");
+    //printf("\t(') Abrir Console\n");
     do
         {
         Resposta = getch();
         Resposta=toupper(Resposta);
         }
-    while(Resposta!='N' && Resposta!='C' && Resposta!='S' && Resposta!='Q' && Resposta!='V');
+    while(Resposta!='N' && Resposta!='C' && Resposta!='S' && Resposta!='Q' && Resposta!='V' /*&& Resposta!= 39 (apostrofe')*/);
     *Selecaopont=Resposta;
     clrscr();
     }
@@ -379,17 +380,25 @@ void  Execucao(int Mapa, int Vidas)
                     timerint++;
                     timer = clock();
                 }
-                switch(Tecla = toupper(Tecla))
+                switch(Tecla)
                 {   case 'w':
                     case 'W': Move(MapadoJogo, &Jogador, 0, -1, &Controle);
                             break;
+                    case 'a':
                     case 'A': Move(MapadoJogo, &Jogador, -1, 0, &Controle);
                             break;
+                    case 's':
                     case 'S': Move(MapadoJogo, &Jogador, 0, +1, &Controle);
                             break;
+                    case 'd':
                     case 'D': Move(MapadoJogo, &Jogador, +1, 0, &Controle);
                             break;
+                    case 'f':
                     case 'F': Aura(MapadoJogo, &Jogador);
+                            break;
+                    //case 9 : printf("ABRIR MENU"); (APERTOU TAB)
+                            //função TAB PARA ABRIR O MENU
+                           // break;
                 }
                 PintaMapa(MapadoJogo, LINHAS, COLUNAS);
 
@@ -415,7 +424,7 @@ void  Execucao(int Mapa, int Vidas)
         printf("GAME OVER");
     }
 
-    Sleep(200);
+    Sleep(1000);
     clrscr();
     }
 
@@ -430,8 +439,50 @@ void Salvamento()
 
 }
 
+void Cheat_Code()
+{
+//declare local variables//
+char cheatcode[20];
+int repeticao=0, validacao = 0;
 
 
+//Run the code to check the password//
+do
+{
+    fflush(stdin);
+    printf("Insira o Cheat Code: ");
+    scanf("%s", cheatcode);
+    validacao = strcmp(cheatcode,"covarde");
+    if (validacao == 0)
+    {
+        printf("\n Accepted type 1");
+    }
+    else
+    {
+        validacao = strcmp(cheatcode,"greyskull");
+        if (validacao == 0)
+        {
+            printf("\n Accepted type 2");
+        }
+        else
+        {
+            printf("Wrong password\n");
+        }
+    }
+    printf("\n %s", cheatcode);
+    printf("\nTentar Novamente?\n(S)im ou (N)ao?\n");
+    fflush(stdin);
+    switch (_getch())
+    {
+        case 's':
+        case 'S': repeticao = 0; break;
+        case 'n':
+        case 'N': repeticao = 1; break;
+        default: repeticao = 0; break;
+    }
+}while (repeticao == 0);
+
+}
 
 int main()
     {
@@ -448,7 +499,6 @@ int main()
         Execucao(1, NUMERODEVIDAS); break;
 
     case 'C':
-
         Carregamento();
         Execucao(1, NUMERODEVIDAS);
 
@@ -459,6 +509,9 @@ int main()
 
     case 'V':
         Execucao(1, NUMERODEVIDAS); break;
+    //case 39: (APERTOU APOSTROFE '), ESCONDER NA RELEASE
+        //função leitura de cheat code, exemplos : covarde = vida infinita, greyskull = aumento do tamanho da aura, camaleao = muda cor do jogador
+        //break;
     }
 
     }
