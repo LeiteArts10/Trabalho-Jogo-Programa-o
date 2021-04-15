@@ -59,8 +59,8 @@ void Introducao()  // mensagem de introducao
     {
      printf("\t\t\tBem vindo ao jogo.\n\n\tNeste jogo voce representa um mago que tem como \n\tobjetivo recuperar o tesouro de seu povo.\n\n");
      printf("\tPara isso devera atravesar todos os niveis superando os obstaculos \n\tdo calabouco.\n\n\tEntre os obstaculos estao trols e zumbi que podem \n\tdevora-lo e espinhos que podem machuca-lo.\n\n");
-     printf("\tAlem de superar os obstaculos, pode marcar pontos matando os monstros \n\tutilizando sua aura magica,\n\tseu super poder.\n\n");
-     printf("Para fazer vai ter 3 vidas para atravessar todas as salas do calabouco.\n");
+     printf("\tAlem de superar os obstaculos, pode marcar pontos matando os monstros \n\tutilizando sua aura magica, seu super poder.\n\n");
+     printf("\tPara fazer vai ter 3 vidas para atravessar as salas do calabouco.\n");
      printf("\tComandos:\n");
      printf("\tMovimento\t\tW/S/A/D\n\tAura Magica\t\tF\n\tMenu\t\t\tTAB\n\n");
      printf("\t\t\t\t\tBoa Sorte!!!\n\n");
@@ -73,6 +73,7 @@ void Introducao()  // mensagem de introducao
 void Menu(char *Selecaopont) // mostra menu e retorna resposta
     {
     char Resposta;
+    textcolor(BLACK);
     printf("\n\t(N) Novo jogo\n");
     printf("\t(C) Carregar jogo salvo (se houver)\n");
     printf("\t(S) Salvar jogo\n");
@@ -82,9 +83,8 @@ void Menu(char *Selecaopont) // mostra menu e retorna resposta
     do
         {
         Resposta = getch();
-        Resposta=toupper(Resposta);
         }
-    while(Resposta!='N' && Resposta!='C' && Resposta!='S' && Resposta!='Q' && Resposta!='V' /*&& Resposta!= 39 (apostrofe')*/);
+    while(Resposta!='N' && Resposta!='n' && Resposta!='C' && Resposta!='c' && Resposta!='S' && Resposta!='s' && Resposta!='Q' && Resposta!='q' && Resposta!='V' && Resposta!='v' && Resposta!= 39);
     *Selecaopont=Resposta;
     clrscr();
     }
@@ -209,7 +209,16 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
 
     int I, X = 0, Y = 0;
     char Simbolo;
-    printf("\nVidas restantes: %d", Jogador->Vidas+1);
+    if (Jogador->Vidas>0)
+    {
+        textcolor(BLACK);
+        printf("\nVidas restantes: %d", Jogador->Vidas+1);
+    }
+    else
+    {
+        textcolor(RED);
+        printf("\nVidas restantes: %d", Jogador->Vidas+1);
+    }
 
     for(I = 0; I < Quant; I++)
     {
@@ -284,7 +293,6 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
 
 void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador)
 {
-
 printf("teste");
 
 }
@@ -324,15 +332,24 @@ void PintaMapa(char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas){   // 
     }
 }
 
+void SalvamentoTemp(char MapadoJogo, int Vidas)
+{
+
+
+
+
+
+}
+
 void HideCursor()   // acho que apaga o ponteiro
 {
   CONSOLE_CURSOR_INFO cursor = {1, FALSE};
   SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor);
 }
 
-void  Execucao(int Mapa, int Vidas)
-    {
+void  Execucao(int Mapa, int Vidas, int FuncaoCovarde){
     int I;
+    int Menu = 0;
     char MapadoJogo[LINHAS][COLUNAS];
     int QuantInimigos;
     int Controle = 0;
@@ -347,7 +364,7 @@ void  Execucao(int Mapa, int Vidas)
     srand(time(NULL));
     Jogador.Vidas=Vidas-1;
 
-    while(Jogador.Vidas > 0 && Colisao != 2)
+    while(Jogador.Vidas > 0 && Colisao != 2  &&  Menu != 1)
     {
         if(LerMapa("mapa 1.txt", MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS1, &QuantInimigos, Inimigos, &Jogador))
         {
@@ -356,14 +373,21 @@ void  Execucao(int Mapa, int Vidas)
 
             if(Controle == 1)
             {
-                Jogador.Vidas--;
+                if(FuncaoCovarde==0)
+                {
+                    Jogador.Vidas--;
+                }
+                else
+                {
+                Jogador.Vidas=Jogador.Vidas;
+                }
             }
             Controle = 0;
             for(I = 0; I < QuantInimigos; I++)
             {
                 Inimigos[I].Direcao = SelecionaDirecao();
             }
-            while((Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 1 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 2 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 3 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 4)
+            while((Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 1 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 2 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 3 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 4  && Menu != 1)
             {
                 if(kbhit())
                 {
@@ -396,9 +420,10 @@ void  Execucao(int Mapa, int Vidas)
                     case 'f':
                     case 'F': Aura(MapadoJogo, &Jogador);
                             break;
-                    //case 9 : printf("ABRIR MENU"); (APERTOU TAB)
-                            //função TAB PARA ABRIR O MENU
-                           // break;
+                    case 9 : Menu=1;
+                             //SalvamentoTemp(MapadoJogo, %Jogador.Vidas);
+                            break;
+
                 }
                 PintaMapa(MapadoJogo, LINHAS, COLUNAS);
 
@@ -416,6 +441,10 @@ void  Execucao(int Mapa, int Vidas)
         textcolor(GREEN);
         printf("VICTORY");
     }
+    else if (Menu == 1)
+    {
+    gotoxy(20,10);
+    }
     else
     {
         clrscr();
@@ -424,7 +453,7 @@ void  Execucao(int Mapa, int Vidas)
         printf("GAME OVER");
     }
 
-    Sleep(1000);
+    Sleep(1200);
     clrscr();
     }
 
@@ -432,18 +461,22 @@ void  Execucao(int Mapa, int Vidas)
 void Carregamento()
 {
 
+// vair ler um arquivo com o mapa e as vidas e chamar a execucoa com esses dados
+
 }
 
 void Salvamento()
 {
 
+// transforma o arquivo de salvamento temporario em definitivo
+
 }
 
-void Cheat_Code()
+void Cheat_Code(int* Covarde)
 {
 //declare local variables//
-char cheatcode[20];
-int repeticao=0, validacao = 0;
+    char cheatcode[20];
+    int repeticao=0, validacao = 0;
 
 
 //Run the code to check the password//
@@ -456,6 +489,7 @@ do
     if (validacao == 0)
     {
         printf("\n Accepted type 1");
+        *Covarde=1;
     }
     else
     {
@@ -481,6 +515,7 @@ do
         default: repeticao = 0; break;
     }
 }while (repeticao == 0);
+clrscr();
 
 }
 
@@ -489,29 +524,36 @@ int main()
     char MapadoJogo[LINHAS][COLUNAS];
     int Sair=0;
     char Selecao;
+    int ControledoCovarde=0;
     Introducao();
-    Execucao(1, NUMERODEVIDAS);
+    Execucao(1, NUMERODEVIDAS, ControledoCovarde);
     while(Sair==0)
     {
      Menu(&Selecao);
      switch(Selecao){
-    case 'N':
-        Execucao(1, NUMERODEVIDAS); break;
+    case 'n':
+    case 'N': Execucao(1, NUMERODEVIDAS, ControledoCovarde);
+            break;
 
-    case 'C':
-        Carregamento();
-        Execucao(1, NUMERODEVIDAS);
+    case 'c':
+    case 'C': Carregamento();  // com arquivo  salvo
+            break;
 
-    case 'S': Salvamento();  break;
+    case 's':
+    case 'S': Salvamento();
+            break;
 
+    case 'q':
     case 'Q': Sair=1;
-                break;
+            break;
 
-    case 'V':
-        Execucao(1, NUMERODEVIDAS); break;
-    //case 39: (APERTOU APOSTROFE '), ESCONDER NA RELEASE
+    case 'v':
+    case 'V': Carregamento(); // com arquivo temp
+            break;
+
+    case 39: Cheat_Code(&ControledoCovarde); //(APERTOU APOSTROFE '), ESCONDER NA RELEASE
         //função leitura de cheat code, exemplos : covarde = vida infinita, greyskull = aumento do tamanho da aura, camaleao = muda cor do jogador
-        //break;
+            break;
     }
 
     }
