@@ -39,6 +39,14 @@
 
 #define MAXIMODEMONSTROS1 15
 
+typedef struct Dificuldade //definicoes de dificuldade
+{
+    int VidasIniciais;//vidas iniciais do jogador
+    int DanoDaAura;//dano aplicado nos monstros
+    int RecargaAura;//tempo de recarga da aura magica
+
+}DIFICULDADE;
+
 typedef struct Jogador  // definicoes do jogador
 {
     int PosX;
@@ -53,9 +61,10 @@ typedef struct Inimigo  // definicoes dos inimigos
     int Direcao;
     int Tipo;
     int steps;
+
 } INIMIGO;
 
-void Introducao()  // mensagem de introducao
+void Introducao()// mensagem de introducao
     {
      printf("\t\t\tBem vindo ao jogo.\n\n\tNeste jogo voce representa um mago que tem como \n\tobjetivo recuperar o tesouro de seu povo.\n\n");
      printf("\tPara isso devera atravesar todos os niveis superando os obstaculos \n\tdo calabouco.\n\n\tEntre os obstaculos estao trols e zumbi que podem \n\tdevora-lo e espinhos que podem machuca-lo.\n\n");
@@ -68,7 +77,38 @@ void Introducao()  // mensagem de introducao
      fflush(stdin);
      getchar();
      clrscr();
+
     }
+
+void ConclusaoNormal()  //Mensagem dada após terminar o jogo na dificuldade padrao
+{
+     printf("\n\t\t\tParabens, Voce Venceu!!!\n\n");
+     printf("\tVoce recuperou o tesouro de seu povo e agora sua cidade podera viver em paz\n\n");
+     printf("\tSe desejar, pode reviver sua aventura jogando com uma outra dificuldade\n");
+
+     printf("\nAperte qualquer tecla para ir ao menu inicial");
+     fflush(stdin);
+     getchar();
+     clrscr();
+}
+
+void ConclusaoDificil() //Mensagem dada após terminar o jogo na dificuldade Dicifil
+{
+    printf("\n\t\t\tParabens, Voce Venceu!!!\n\n");
+
+    printf("\tPor ter ganho o jogo no modo Dificil agora voce e digno de conhecer");
+    printf(" \nnovos poderes capazes de manipular as leis do universo\n");
+    printf("\n\tPara acessa-los basta apertar a tecla apostrofe(') quando abrir o menu\n");
+    printf("e dizer o seguinte:\t\tcovarde\t\t-\tPara ter vidas infinitas\n");
+    printf("\t\t\t\tgreyskull\t-\tPara aumentar o poder de sua aura magica");
+
+    printf("\n\n\tMuito Obrigado por jogar, boa sorte em sua proxima aventura!\n\n");
+
+    fflush(stdin);
+    getchar();
+    clrscr();
+
+}
 
 void Menu(char *Selecaopont) // mostra menu e retorna resposta
     {
@@ -102,7 +142,7 @@ int LerMapa(char *NomedoMapa, char MapadoJogo[LINHAS][COLUNAS], int Linhas, int 
             {
                 MapadoJogo[I][J]= getc(Arquivo);
                 switch(MapadoJogo[I][J]){
-                    case 'z':
+                    case 'z'://ZUMBI
                     case 'Z': if(*QuantInimigos<=MaximodeInimigos){
                               Inimigo[*QuantInimigos].PosX = J;
                               Inimigo[*QuantInimigos].PosY = I;
@@ -112,7 +152,7 @@ int LerMapa(char *NomedoMapa, char MapadoJogo[LINHAS][COLUNAS], int Linhas, int 
                               *QuantInimigos = *QuantInimigos+1;
                               break;
                             }
-                    case 't':
+                    case 't'://TROLL
                     case 'T': if(*QuantInimigos<=MaximodeInimigos){
                               Inimigo[*QuantInimigos].PosX = J;
                               Inimigo[*QuantInimigos].PosY = I;
@@ -341,7 +381,7 @@ void SalvamentoTemp(char MapadoJogo, int Vidas)
 
 }
 
-void HideCursor()   // acho que apaga o ponteiro
+void HideCursor()   //apaga o ponteiro
 {
   CONSOLE_CURSOR_INFO cursor = {1, FALSE};
   SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor);
@@ -439,7 +479,9 @@ void  Execucao(int Mapa, int Vidas, int FuncaoCovarde){
         clrscr();
         gotoxy(20,10);
         textcolor(GREEN);
-        printf("VICTORY");
+        printf("VITORIA");
+        //adicionar função parra carregar proximo mapa (se existir)
+        //se não existir, imprimir tela de vitória final
     }
     else if (Menu == 1)
     {
@@ -450,10 +492,10 @@ void  Execucao(int Mapa, int Vidas, int FuncaoCovarde){
         clrscr();
         gotoxy(20,10);
         textcolor(RED);
-        printf("GAME OVER");
+        printf("DERROTA");
     }
 
-    Sleep(1200);
+    Sleep(1200);//tempo de espera
     clrscr();
     }
 
@@ -485,7 +527,7 @@ do
     fflush(stdin);
     printf("Insira o Cheat Code: ");
     scanf("%s", cheatcode);
-    validacao = strcmp(cheatcode,"covarde");
+    validacao = strcmp(cheatcode,"covarde");//torna vidas infinitas
     if (validacao == 0)
     {
         printf("\n Accepted type 1");
@@ -493,20 +535,20 @@ do
     }
     else
     {
-        validacao = strcmp(cheatcode,"greyskull");
+        validacao = strcmp(cheatcode,"greyskull");//buff na aura
         if (validacao == 0)
         {
             printf("\n Accepted type 2");
         }
         else
         {
-            printf("Wrong password\n");
+            printf("Wrong password\n");//codigo errado
         }
     }
     printf("\n %s", cheatcode);
     printf("\nTentar Novamente?\n(S)im ou (N)ao?\n");
     fflush(stdin);
-    switch (_getch())
+    switch (_getch())//laço de repetição
     {
         case 's':
         case 'S': repeticao = 0; break;
