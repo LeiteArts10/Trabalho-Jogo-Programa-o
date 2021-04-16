@@ -4,9 +4,17 @@
 #include <conio.h>
 #include <conio2.h>
 #include <windows.h>
+//#include <linux.h> necessario mudar funcoes dependentes de OS
+//#include <MACOS.h> necessario mudar funcoes dependentes de OS
 #include <time.h>
 
+
 #define NUMERODEVIDAS 3
+#define TAMAURA 2
+#define DANOAURA 1
+
+#define VIDAZUMBI 1
+#define VIDATROLL 2
 
 #define UP_DIRECTION 1
 #define RIGHT_DIRECTION 2
@@ -26,7 +34,9 @@
 #define ZUMBI 'Z'
 #define TROLL 'T'
 #define VAZIO ' '
-#define AURA '*'
+#define AURA 'O'
+//#define AURA_CHEFAO_PREPARO 'C' "telegrafa" ataque do chefao, dando tempo de reacao pro jogador, nao causa dano
+//#define AURA_CHEFAO_ATIVA 'D' aura ativa, causa perda de vida se jogador entrar em contato
 
 #define COR_PAREDE 8
 #define COR_OBSTACULO 2
@@ -36,6 +46,8 @@
 #define COR_TROLL 16
 #define COR_VAZIO 7
 #define COR_AURA 15
+//#define COR_AURACHEFAO_PREPARO X
+//#define COR_AURACHEFAO_ATIVA X
 
 #define MAXIMODEMONSTROS1 15
 
@@ -63,6 +75,19 @@ typedef struct Inimigo  // definicoes dos inimigos
     int steps;
 
 } INIMIGO;
+
+typedef struct Estado_de_Jogo //definições do estado de jogo, usado para escrever e ler arrquivo binario
+{
+    int VidasRestantes;
+    int MapaAtual;
+    int Dificuldade; //0- normal    1- dificil
+    int RecargaAura; //tempo até poder usar a aura novamente
+
+    //trapaças
+    int CovardeAtivado;     //0-desativado      1-ativado
+    int GreyskullAtivado;   //0-desativado      1-ativado
+
+}ESTADODEJOGO;
 
 void Introducao()// mensagem de introducao
     {
@@ -115,6 +140,7 @@ void Menu(char *Selecaopont) // mostra menu e retorna resposta
     char Resposta;
     textcolor(BLACK);
     printf("\n\t(N) Novo jogo\n");
+    printf("\t(Q) Sair do jogo\n");
     printf("\t(C) Carregar jogo salvo (se houver)\n");
     printf("\t(S) Salvar jogo\n");
     printf("\t(Q) Sair do jogo\n");
@@ -166,6 +192,11 @@ int LerMapa(char *NomedoMapa, char MapadoJogo[LINHAS][COLUNAS], int Linhas, int 
                     case 'J': Jogador -> PosX = J;
                               Jogador -> PosY = I;
                               break;
+                    /*case 'o':
+                    case 'O': AURA ATIVA, para no caso de salvamento de mapa ter aura ativada, COLOCAR funcao para substituir 'O' por espaço em branco   */
+
+                    /*case 'c':
+                    case 'C': AURA DO CHEFAO ATIVA */
                 }
             }
             getc(Arquivo);
@@ -195,6 +226,7 @@ int ControledeColisao(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador){  // ve
 
         case(TROLL): Cod = 4; //se a posição a ser ocupada pelo jogador é um troll ele retorna um código 4 para a função de movimentação
                             break;
+        //case(AURA): Cod = 6; //se a posição a ser ocupada é uma Aura ele retorna código 5 para a função de movimentação
         default: break;
     }
 
@@ -230,6 +262,7 @@ void Move(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, int X, int Y, int *
 
         case 5: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = JOGADOR;
                 break;
+        //case 6: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = AURA;
     }
 
 }
@@ -333,7 +366,8 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
 
 void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador)
 {
-printf("teste");
+
+    printf("teste");
 
 }
 
@@ -372,7 +406,7 @@ void PintaMapa(char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas){   // 
     }
 }
 
-void SalvamentoTemp(char MapadoJogo, int Vidas)
+void SalvamentoTemp(char MapadoJogo, int Vidas)//exporta estado atual do mapa para arquivo texto e ESTADO DE JOGO para arquivo binario
 {
 
 
@@ -567,14 +601,14 @@ int main()
     int Sair=0;
     char Selecao;
     int ControledoCovarde=0;
-    Introducao();
-    Execucao(1, NUMERODEVIDAS, ControledoCovarde);
+    Introducao();//ARRUMAR CORES
     while(Sair==0)
     {
      Menu(&Selecao);
      switch(Selecao){
     case 'n':
-    case 'N': Execucao(1, NUMERODEVIDAS, ControledoCovarde);
+    case 'N':   //SelecionarDificuldade(); //seleciona dificuldade 0-normal 1-dificil
+                Execucao(1, NUMERODEVIDAS, ControledoCovarde);
             break;
 
     case 'c':
@@ -594,10 +628,10 @@ int main()
             break;
 
     case 39: Cheat_Code(&ControledoCovarde); //(APERTOU APOSTROFE '), ESCONDER NA RELEASE
-        //função leitura de cheat code, exemplos : covarde = vida infinita, greyskull = aumento do tamanho da aura, camaleao = muda cor do jogador
+        //função leitura de cheat code, exemplos : covarde = vida infinita, greyskull = aumento do dano da aura, camaleao = muda cor do jogador
             break;
     }
-
+    Execucao(1, NUMERODEVIDAS, ControledoCovarde);
     }
     return (0);
     }
