@@ -50,6 +50,7 @@
 //#define COR_AURACHEFAO_ATIVA X
 
 #define MAXIMODEMONSTROS1 15
+#define NUMEROULTIMOMAPA 2
 
 typedef struct Dificuldade //definicoes de dificuldade
 {
@@ -80,7 +81,7 @@ typedef struct Estado_de_Jogo //definições do estado de jogo, usado para escreve
 {
     int VidasRestantes;
     int MapaAtual;
-    int Dificuldade; //0- normal    1- dificil
+    DIFICULDADE Dificuldade;
     int RecargaAura; //tempo até poder usar a aura novamente
 
     //trapaças
@@ -135,10 +136,42 @@ void ConclusaoDificil() //Mensagem dada após terminar o jogo na dificuldade Dici
 
 }
 
+int SelecionarDificuldade(){
+    int nivelDeDificuldade, valido;
+    clrscr();
+    printf("Selecione a dificuldade que voce deseja jogar\n(1)-Facil\n(2)-Dificil\n");
+    scanf("%d", &nivelDeDificuldade);
+    valido = 0;
+    do{
+        switch (nivelDeDificuldade){
+            case 1: printf("\nVoce selecionou dificuldade facil, voce tera 3 vidas para completar o jogo\nPressione qualquer tecla para continuar");
+                    valido = 1;
+                    getch();
+                    break;
+            case 2: printf("\nVoce selecionou a dificuldade dificil, voce tem apenas uma vida para completar o jogo e sua aura e mais fraca\nPressione qualquer tecla para continuar");
+                    valido = 1;
+                    getch();
+                    break;
+            default: printf("\nErro, selecione uma dificuldade valida\n");
+                    valido = 0;
+                    scanf("%d", &nivelDeDificuldade);
+                    break;
+        }
+    }while (valido == 0);
+    if (nivelDeDificuldade == 1){
+        clrscr();
+        return 1;
+    }
+    else if (nivelDeDificuldade == 2){
+        clrscr();
+        return 2;
+    }
+}
+
 void Menu(char *Selecaopont) // mostra menu e retorna resposta
     {
     char Resposta;
-    textcolor(BLACK);
+    textcolor(WHITE);
     printf("\n\t(N) Novo jogo\n");
     printf("\t(Q) Sair do jogo\n");
     printf("\t(C) Carregar jogo salvo (se houver)\n");
@@ -406,12 +439,13 @@ void PintaMapa(char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas){   // 
     }
 }
 
-void SalvamentoTemp(char MapadoJogo, int Vidas)//exporta estado atual do mapa para arquivo texto e ESTADO DE JOGO para arquivo binario
+void SalvamentoTemp(char MapadoJogo, ESTADODEJOGO Estado_de_Jogo)//exporta estado atual do mapa para arquivo texto e ESTADO DE JOGO para arquivo binario
 {
 
+    //fopen(mapa temp)//escreve em arquivo txt o estado atual do mapa
 
 
-
+    //fopen(estado temp)//escreve estado de jogo em arquivo binario
 
 }
 
@@ -421,7 +455,7 @@ void HideCursor()   //apaga o ponteiro
   SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor);
 }
 
-void  Execucao(int Mapa, int Vidas, int FuncaoCovarde){
+void Execucao(int numeroMapa, int Vidas, int FuncaoCovarde){//mudar parametros para ESTADO DE JOGO
     int I;
     int Menu = 0;
     char MapadoJogo[LINHAS][COLUNAS];
@@ -437,10 +471,13 @@ void  Execucao(int Mapa, int Vidas, int FuncaoCovarde){
     timer = clock();
     srand(time(NULL));
     Jogador.Vidas=Vidas-1;
+    char nomeArquivo[10];
 
-    while(Jogador.Vidas > 0 && Colisao != 2  &&  Menu != 1)
+    snprintf(nomeArquivo, sizeof nomeArquivo, "mapa%d.txt", numeroMapa);//transforma numero mapa em string pra carregar diferentes mapas
+
+    while(Jogador.Vidas >= 1 && Colisao != 2  &&  Menu != 1)
     {
-        if(LerMapa("mapa 1.txt", MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS1, &QuantInimigos, Inimigos, &Jogador))
+        if(LerMapa(&nomeArquivo, MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS1, &QuantInimigos, Inimigos, &Jogador))
         {
             PintaMapa(MapadoJogo, LINHAS, COLUNAS);
             HideCursor();
@@ -513,9 +550,18 @@ void  Execucao(int Mapa, int Vidas, int FuncaoCovarde){
         clrscr();
         gotoxy(20,10);
         textcolor(GREEN);
-        printf("VITORIA");
-        //adicionar função parra carregar proximo mapa (se existir)
+        printf("PASSOU DE FASE");
+        numeroMapa++;
+        Sleep(1200);//tempo de espera
+        clrscr();
+
+        //Estado_de_Jogo.mapaAtual=numeroMapa retornar codigo de vitoria de fase
+        return 1;
+
         //se não existir, imprimir tela de vitória final
+        // if(numeroMapa>NUMEROULTIMOMAPA) retornar codigo de vitoria final
+            return 3;
+
     }
     else if (Menu == 1)
     {
@@ -527,24 +573,41 @@ void  Execucao(int Mapa, int Vidas, int FuncaoCovarde){
         gotoxy(20,10);
         textcolor(RED);
         printf("DERROTA");
+        Sleep(1200);//tempo de espera
+        clrscr();
+        return 0; // retornar codigo de derrota
     }
 
-    Sleep(1200);//tempo de espera
-    clrscr();
-    }
+clrscr();
+}
 
 
 void Carregamento()
 {
 
-// vair ler um arquivo com o mapa e as vidas e chamar a execucoa com esses dados
+    //fopen()//ler a lista com o nome dos salvamentos
+    //scanf() ler do usuario o nome que ele quer carregar
+
+    //fopen()//ler o arquivo que o usuario digitou
+        //aplicar estado de jogo do arquivo no programa
+
+    //fclose()//fechar arquivo
 
 }
 
-void Salvamento()
+void Salvamento(ESTADODEJOGO Estado_de_Jogo)
 {
+    char nomeDoSave[20];
+    printf("\nDigite o nome com que deseja salvar o arquivo");
+    scanf("%s",nomeDoSave);
 
-// transforma o arquivo de salvamento temporario em definitivo
+    //fopen()//escrever em um arquivo txt o nome dos saves
+
+    //fclose()//fechar o arquivo com o nome dos saves
+
+    //fopen()//escrever estado de jogo em arquivo binario com o nome do save
+
+    //fclose()//fechar o arquivo
 
 }
 
@@ -601,37 +664,60 @@ int main()
     int Sair=0;
     char Selecao;
     int ControledoCovarde=0;
+    int selecDificuldade,i, vidasRestantes;
+    DIFICULDADE Dificuldade;
+    ESTADODEJOGO Estado_de_Jogo;
+
+    //inicialização de estado de jogo
+    Estado_de_Jogo.CovardeAtivado=0;
+    Estado_de_Jogo.GreyskullAtivado=0;
+    Estado_de_Jogo.MapaAtual=0;
+    Estado_de_Jogo.RecargaAura=0;
+    Estado_de_Jogo.VidasRestantes=NUMERODEVIDAS;
+
     Introducao();//ARRUMAR CORES
     while(Sair==0)
     {
-     Menu(&Selecao);
-     switch(Selecao){
-    case 'n':
-    case 'N':   //SelecionarDificuldade(); //seleciona dificuldade 0-normal 1-dificil
-                Execucao(1, NUMERODEVIDAS, ControledoCovarde);
+        Menu(&Selecao);
+        switch(Selecao){
+        case 'n':
+        case 'N':   selecDificuldade = SelecionarDificuldade(); //seleciona dificuldade 0-normal 1-dificil
+                    if (selecDificuldade == 1){//FACIL
+                        Estado_de_Jogo.Dificuldade.VidasIniciais = 3;
+                        Estado_de_Jogo.Dificuldade.DanoDaAura = 2;
+                        Estado_de_Jogo.Dificuldade.RecargaAura = 2; //2 segundos
+                    }
+                    else if (selecDificuldade == 2){//DIFICIL
+                        Estado_de_Jogo.Dificuldade.VidasIniciais = 1;
+                        Estado_de_Jogo.Dificuldade.DanoDaAura = 1;
+                        Estado_de_Jogo.Dificuldade.RecargaAura = 5; //2 segundos
+                    }
+
+                        i=0;//numero do mapa
+                        vidasRestantes=Dificuldade.VidasIniciais;
+                        Execucao(i,vidasRestantes,ControledoCovarde);
             break;
 
-    case 'c':
-    case 'C': Carregamento();  // com arquivo  salvo
+        case 'c':
+        case 'C': //Carregamento();  // com arquivo  salvo
             break;
 
-    case 's':
-    case 'S': Salvamento();
+        case 's':
+        case 'S': //Salvamento();
             break;
 
-    case 'q':
-    case 'Q': Sair=1;
+        case 'q':
+        case 'Q': Sair=1;
             break;
 
-    case 'v':
-    case 'V': Carregamento(); // com arquivo temp
+        case 'v':
+        case 'V': //Carregamento(); // com arquivo temp
             break;
 
-    case 39: Cheat_Code(&ControledoCovarde); //(APERTOU APOSTROFE '), ESCONDER NA RELEASE
+        case 39: Cheat_Code(&ControledoCovarde); //(APERTOU APOSTROFE '), ESCONDER NA RELEASE
         //função leitura de cheat code, exemplos : covarde = vida infinita, greyskull = aumento do dano da aura, camaleao = muda cor do jogador
             break;
-    }
-    Execucao(1, NUMERODEVIDAS, ControledoCovarde);
+        }
     }
     return (0);
     }
