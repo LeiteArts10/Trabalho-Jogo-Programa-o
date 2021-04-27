@@ -173,7 +173,6 @@ void Menu(char *Selecaopont) // mostra menu e retorna resposta
     char Resposta;
     textcolor(WHITE);
     printf("\n\t(N) Novo jogo\n");
-    printf("\t(Q) Sair do jogo\n");
     printf("\t(C) Carregar jogo salvo (se houver)\n");
     printf("\t(S) Salvar jogo\n");
     printf("\t(Q) Sair do jogo\n");
@@ -686,11 +685,13 @@ int main()
                         Estado_de_Jogo.Dificuldade.VidasIniciais = 3;
                         Estado_de_Jogo.Dificuldade.DanoDaAura = 2;
                         Estado_de_Jogo.Dificuldade.RecargaAura = 2; //2 segundos
+                        Execucao(1, Estado_de_Jogo.Dificuldade.VidasIniciais, Estado_de_Jogo.CovardeAtivado);
                     }
                     else if (selecDificuldade == 2){//DIFICIL
                         Estado_de_Jogo.Dificuldade.VidasIniciais = 1;
                         Estado_de_Jogo.Dificuldade.DanoDaAura = 1;
                         Estado_de_Jogo.Dificuldade.RecargaAura = 5; //2 segundos
+                        Execucao(1, Estado_de_Jogo.Dificuldade.VidasIniciais, Estado_de_Jogo.CovardeAtivado);
                     }
 
                         i=0;//numero do mapa
