@@ -317,12 +317,12 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
     if (Jogador->Vidas>0)
     {
         textcolor(BLACK);
-        printf("\nVidas restantes: %d", Jogador->Vidas+1);
+        printf("\nVidas restantes: %d", Jogador->Vidas);
     }
     else
     {
         textcolor(RED);
-        printf("\nVidas restantes: %d", Jogador->Vidas+1);
+        printf("\nVidas restantes: %d", Jogador->Vidas);
     }
 
     for(I = 0; I < Quant; I++)
@@ -454,7 +454,7 @@ void HideCursor()   //apaga o ponteiro
   SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor);
 }
 
-void Execucao(int numeroMapa, int Vidas, int FuncaoCovarde){//mudar parametros para ESTADO DE JOGO
+void Execucao(int numeroMapa, int FuncaoCovarde, ESTADODEJOGO *Estado_de_Jogo){//mudar parametros para ESTADO DE JOGO
     int I;
     int Menu = 0;
     char MapadoJogo[LINHAS][COLUNAS];
@@ -469,7 +469,8 @@ void Execucao(int numeroMapa, int Vidas, int FuncaoCovarde){//mudar parametros p
     timebegin = clock();
     timer = clock();
     srand(time(NULL));
-    Jogador.Vidas=Vidas-1;
+    Jogador.Vidas = Estado_de_Jogo->VidasRestantes;
+
     char nomeArquivo[10];
 
     snprintf(nomeArquivo, sizeof nomeArquivo, "mapa%d.txt", numeroMapa);//transforma numero mapa em string pra carregar diferentes mapas
@@ -663,8 +664,7 @@ int main()
     int Sair=0;
     char Selecao;
     int ControledoCovarde=0;
-    int selecDificuldade,i, vidasRestantes;
-    DIFICULDADE Dificuldade;
+    int selecDificuldade,i;
     ESTADODEJOGO Estado_de_Jogo;
 
     //inicialização de estado de jogo
@@ -672,7 +672,6 @@ int main()
     Estado_de_Jogo.GreyskullAtivado=0;
     Estado_de_Jogo.MapaAtual=0;
     Estado_de_Jogo.RecargaAura=0;
-    Estado_de_Jogo.VidasRestantes=NUMERODEVIDAS;
 
     Introducao();//ARRUMAR CORES
     while(Sair==0)
@@ -685,18 +684,22 @@ int main()
                         Estado_de_Jogo.Dificuldade.VidasIniciais = 3;
                         Estado_de_Jogo.Dificuldade.DanoDaAura = 2;
                         Estado_de_Jogo.Dificuldade.RecargaAura = 2; //2 segundos
-                        Execucao(1, Estado_de_Jogo.Dificuldade.VidasIniciais, Estado_de_Jogo.CovardeAtivado);
                     }
                     else if (selecDificuldade == 2){//DIFICIL
                         Estado_de_Jogo.Dificuldade.VidasIniciais = 1;
                         Estado_de_Jogo.Dificuldade.DanoDaAura = 1;
                         Estado_de_Jogo.Dificuldade.RecargaAura = 5; //2 segundos
-                        Execucao(1, Estado_de_Jogo.Dificuldade.VidasIniciais, Estado_de_Jogo.CovardeAtivado);
                     }
 
                         i=0;//numero do mapa
-                        vidasRestantes=Dificuldade.VidasIniciais;
-                        Execucao(i,vidasRestantes,ControledoCovarde);
+                        Estado_de_Jogo.VidasRestantes = Estado_de_Jogo.Dificuldade.VidasIniciais;
+
+                        Execucao(i,&Estado_de_Jogo.VidasRestantes,ControledoCovarde);
+                        printf("%d passando proximo mapa", Estado_de_Jogo.VidasRestantes);
+                        getch();
+                        getch();
+                        i=1;
+                        Execucao(i,ControledoCovarde, &Estado_de_Jogo);
             break;
 
         case 'c':
