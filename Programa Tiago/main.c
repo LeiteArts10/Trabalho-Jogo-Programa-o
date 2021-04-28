@@ -9,8 +9,9 @@
 #include <time.h>
 
 
-#define NUMERODEVIDAS 3
-#define TAMAURA 2
+#define NUMERODEVIDASFACIL 3
+#define NUMERODEVIDASDIFICIL 1
+#define TAMANHOAURA 2
 #define DANOAURA 1
 
 #define VIDAZUMBI 1
@@ -49,8 +50,7 @@
 //#define COR_AURACHEFAO_PREPARO X
 //#define COR_AURACHEFAO_ATIVA X
 
-#define MAXIMODEMONSTROS1 15
-#define NUMEROULTIMOMAPA 2
+#define MAXIMODEMONSTROS 15
 
 typedef struct Dificuldade //definicoes de dificuldade
 {
@@ -64,7 +64,6 @@ typedef struct Jogador  // definicoes do jogador
 {
     int PosX;
     int PosY;
-    int Vidas;
 } PLAYER;
 
 typedef struct Inimigo  // definicoes dos inimigos
@@ -95,7 +94,7 @@ void Introducao()// mensagem de introducao
      printf("\t\t\tBem vindo ao jogo.\n\n\tNeste jogo voce representa um mago que tem como \n\tobjetivo recuperar o tesouro de seu povo.\n\n");
      printf("\tPara isso devera atravesar todos os niveis superando os obstaculos \n\tdo calabouco.\n\n\tEntre os obstaculos estao trols e zumbi que podem \n\tdevora-lo e espinhos que podem machuca-lo.\n\n");
      printf("\tAlem de superar os obstaculos, pode marcar pontos matando os monstros \n\tutilizando sua aura magica, seu super poder.\n\n");
-     printf("\tPara fazer vai ter 3 vidas para atravessar as salas do calabouco.\n");
+     printf("\tPara fazer vai ter 3 vidas para atravessar as salas do calabouco em\n\tmodo facil e 1 vida em modo dificil\n");
      printf("\tComandos:\n");
      printf("\tMovimento\t\tW/S/A/D\n\tAura Magica\t\tF\n\tMenu\t\t\tTAB\n\n");
      printf("\t\t\t\t\tBoa Sorte!!!\n\n");
@@ -122,13 +121,13 @@ void ConclusaoDificil() //Mensagem dada após terminar o jogo na dificuldade Dici
 {
     printf("\n\t\t\tParabens, Voce Venceu!!!\n\n");
 
-    printf("\tPor ter ganho o jogo no modo Dificil agora voce e digno de conhecer");
-    printf(" \nnovos poderes capazes de manipular as leis do universo\n");
-    printf("\n\tPara acessa-los basta apertar a tecla apostrofe(') quando abrir o menu\n");
-    printf("e dizer o seguinte:\t\tcovarde\t\t-\tPara ter vidas infinitas\n");
-    printf("\t\t\t\tgreyskull\t-\tPara aumentar o poder de sua aura magica");
+    printf("\tPor ter ganho o jogo no modo Dificil agora voce e digno de conhecer\n");
+    printf("\tnovos poderes capazes de manipular as leis do universo\n");
+    printf("\tPara acessa-los basta apertar a tecla apostrofe(') quando abrir o menu\n");
+    printf("\te dizer o seguinte:\n\t\tcovarde\t\t-\tPara ter vidas infinitas\n");
+    printf("\t\tgreyskull\t-\tPara aumentar o poder de sua aura magica\n");
 
-    printf("\n\n\tMuito Obrigado por jogar, boa sorte em sua proxima aventura!\n\n");
+    printf("\n\n\tMuito Obrigado por jogar, boa sorte em sua proxima aventura!\n");
 
     fflush(stdin);
     getchar();
@@ -139,20 +138,20 @@ void ConclusaoDificil() //Mensagem dada após terminar o jogo na dificuldade Dici
 int SelecionarDificuldade(){
     int nivelDeDificuldade, valido;
     clrscr();
-    printf("Selecione a dificuldade que voce deseja jogar\n(1)-Facil\n(2)-Dificil\n");
+    printf("\tSelecione a dificuldade que voce deseja jogar\n\t(1)-Facil\n\t(2)-Dificil\n");
     scanf("%d", &nivelDeDificuldade);
     valido = 0;
     do{
         switch (nivelDeDificuldade){
-            case 1: printf("\nVoce selecionou dificuldade facil, voce tera 3 vidas para completar o jogo\nPressione qualquer tecla para continuar");
+            case 1: printf("\n\tVoce selecionou dificuldade facil, voce tera 3 vidas para completar o jogo\nPressione qualquer tecla para continuar");
                     valido = 1;
                     getch();
                     break;
-            case 2: printf("\nVoce selecionou a dificuldade dificil, voce tem apenas uma vida para completar o jogo e sua aura e mais fraca\nPressione qualquer tecla para continuar");
+            case 2: printf("\n\tVoce selecionou a dificuldade dificil, voce tem apenas uma vida para completar o jogo e sua aura e mais fraca\nPressione qualquer tecla para continuar");
                     valido = 1;
                     getch();
                     break;
-            default: printf("\nErro, selecione uma dificuldade valida\n");
+            default: printf("\n\tErro, selecione uma dificuldade valida\n");
                     valido = 0;
                     scanf("%d", &nivelDeDificuldade);
                     break;
@@ -248,17 +247,18 @@ int ControledeColisao(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador){  // ve
                            break;
 
         case(OBSTACULO): Cod = 1; //se a posição a ser ocupada pelo jogador é um obstáculo ele retorna um código 1 para a função de movimentação
-                               break;
+                            break;
 
         case(TESOURO): Cod = 2; //se a posição a ser ocupada pelo jogador é o tesouro ele retorna um código 2 para a função de movimentação
-                           break;
+                            break;
 
         case(ZUMBI): Cod = 3; //se a posição a ser ocupada pelo jogador é um zombie ele retorna um código 3 para a função de movimentação
-                             break;
+                            break;
 
         case(TROLL): Cod = 4; //se a posição a ser ocupada pelo jogador é um troll ele retorna um código 4 para a função de movimentação
                             break;
-        //case(AURA): Cod = 6; //se a posição a ser ocupada é uma Aura ele retorna código 5 para a função de movimentação
+        case(AURA): Cod = 6; //se a posição a ser ocupada é uma Aura ele retorna código 6 para a função de movimentação
+                            break;
         default: break;
     }
 
@@ -294,7 +294,7 @@ void Move(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, int X, int Y, int *
 
         case 5: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = JOGADOR;
                 break;
-        //case 6: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = AURA;
+        case 6: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = AURA;
     }
 
 }
@@ -310,19 +310,19 @@ int SelecionaDirecao(){  // selecione direcao do monstro
 }
 
 
-void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMONSTROS1], int Quant, PLAYER *Jogador, int *Controle){
+void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMONSTROS], int Quant, PLAYER *Jogador, int *Controle, ESTADODEJOGO *estadodejogo){
 
     int I, X = 0, Y = 0;
     char Simbolo;
-    if (Jogador->Vidas>0)
+    if (estadodejogo->VidasRestantes>1)
     {
         textcolor(BLACK);
-        printf("\nVidas restantes: %d", Jogador->Vidas);
+        printf("\nVidas restantes: %d", estadodejogo->VidasRestantes);
     }
     else
     {
         textcolor(RED);
-        printf("\nVidas restantes: %d", Jogador->Vidas);
+        printf("\nVidas restantes: %d", estadodejogo->VidasRestantes);
     }
 
     for(I = 0; I < Quant; I++)
@@ -399,7 +399,7 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
 void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador)
 {
 
-    printf("teste");
+printf("teste");
 
 }
 
@@ -454,45 +454,46 @@ void HideCursor()   //apaga o ponteiro
   SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor);
 }
 
-void Execucao(int numeroMapa, int FuncaoCovarde, ESTADODEJOGO *Estado_de_Jogo){//mudar parametros para ESTADO DE JOGO
+int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
     int I;
     int Menu = 0;
+    ESTADODEJOGO estadoparamover;
+    int testeproximomapa;
     char MapadoJogo[LINHAS][COLUNAS];
     int QuantInimigos;
     int Controle = 0;
     int Colisao=0;
     char Tecla = 'u';
     int timerint = 0;
-    INIMIGO Inimigos[MAXIMODEMONSTROS1];
+    char nomeArquivo[10];
+    INIMIGO Inimigos[MAXIMODEMONSTROS];
     PLAYER Jogador;
     clock_t timer, timerend, timebegin;
     timebegin = clock();
     timer = clock();
     srand(time(NULL));
-    Jogador.Vidas = Estado_de_Jogo->VidasRestantes;
 
-    char nomeArquivo[10];
+    snprintf(nomeArquivo, sizeof nomeArquivo, "mapa%d.txt", estadodejogo->MapaAtual);//transforma numero mapa em string pra carregar diferentes mapas
 
-    snprintf(nomeArquivo, sizeof nomeArquivo, "mapa%d.txt", numeroMapa);//transforma numero mapa em string pra carregar diferentes mapas
-
-    while(Jogador.Vidas >= 1 && Colisao != 2  &&  Menu != 1)
+    while(estadodejogo->VidasRestantes >=1 && Colisao != 2  &&  Menu != 1)
     {
-        if(LerMapa(&nomeArquivo, MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS1, &QuantInimigos, Inimigos, &Jogador))
+        if(LerMapa(nomeArquivo, MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS, &QuantInimigos, Inimigos, &Jogador))
         {
             PintaMapa(MapadoJogo, LINHAS, COLUNAS);
             HideCursor();
 
             if(Controle == 1)
             {
-                if(FuncaoCovarde==0)
+                if(estadodejogo->CovardeAtivado==0)
                 {
-                    Jogador.Vidas--;
+                    estadodejogo->VidasRestantes--;
                 }
                 else
                 {
-                Jogador.Vidas=Jogador.Vidas;
+                estadodejogo->VidasRestantes=estadodejogo->VidasRestantes;
                 }
             }
+            estadoparamover= *estadodejogo;
             Controle = 0;
             for(I = 0; I < QuantInimigos; I++)
             {
@@ -511,7 +512,7 @@ void Execucao(int numeroMapa, int FuncaoCovarde, ESTADODEJOGO *Estado_de_Jogo){/
                 timerend = clock();
                 if(((float)(timerend - timer)/ CLOCKS_PER_SEC)>0.2)
                 {
-                    MoveInimigos(MapadoJogo, Inimigos, QuantInimigos, &Jogador, &Controle);
+                    MoveInimigos(MapadoJogo, Inimigos, QuantInimigos, &Jogador, &Controle, &estadoparamover);
                     timerint++;
                     timer = clock();
                 }
@@ -545,23 +546,23 @@ void Execucao(int numeroMapa, int FuncaoCovarde, ESTADODEJOGO *Estado_de_Jogo){/
             printf("Erro na leitura do mapa\n");
         }
     }
-    if(Colisao == 2)
-    {
+    if(Colisao == 2){
         clrscr();
         gotoxy(20,10);
         textcolor(GREEN);
         printf("PASSOU DE FASE");
-        numeroMapa++;
         Sleep(1200);//tempo de espera
         clrscr();
 
-        //Estado_de_Jogo.mapaAtual=numeroMapa retornar codigo de vitoria de fase
-        return 1;
 
-        //se não existir, imprimir tela de vitória final
-        // if(numeroMapa>NUMEROULTIMOMAPA) retornar codigo de vitoria final
-            return 3;
-
+        testeproximomapa=estadodejogo->MapaAtual+1;
+        snprintf(nomeArquivo, sizeof nomeArquivo, "mapa%d.txt", testeproximomapa);
+        if(LerMapa(nomeArquivo, MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS, &QuantInimigos, Inimigos, &Jogador)){
+            return 1;
+        }
+        else{
+            return 2;
+        }
     }
     else if (Menu == 1)
     {
@@ -611,7 +612,7 @@ void Salvamento(ESTADODEJOGO Estado_de_Jogo)
 
 }
 
-void Cheat_Code(int* Covarde)
+void Cheat_Code(int *covarde, int *greyskull)
 {
 //declare local variables//
     char cheatcode[20];
@@ -628,7 +629,7 @@ do
     if (validacao == 0)
     {
         printf("\n Accepted type 1");
-        *Covarde=1;
+        *covarde=1;
     }
     else
     {
@@ -636,6 +637,7 @@ do
         if (validacao == 0)
         {
             printf("\n Accepted type 2");
+            *greyskull=1;
         }
         else
         {
@@ -645,7 +647,7 @@ do
     printf("\n %s", cheatcode);
     printf("\nTentar Novamente?\n(S)im ou (N)ao?\n");
     fflush(stdin);
-    switch (_getch())//laço de repetição
+    switch (getch())//laço de repetição
     {
         case 's':
         case 'S': repeticao = 0; break;
@@ -663,8 +665,9 @@ int main()
     char MapadoJogo[LINHAS][COLUNAS];
     int Sair=0;
     char Selecao;
-    int ControledoCovarde=0;
-    int selecDificuldade,i;
+    int mapainicial=0;
+    int Dificuldade;
+    int retorno;
     ESTADODEJOGO Estado_de_Jogo;
 
     //inicialização de estado de jogo
@@ -679,27 +682,36 @@ int main()
         Menu(&Selecao);
         switch(Selecao){
         case 'n':
-        case 'N':   selecDificuldade = SelecionarDificuldade(); //seleciona dificuldade 0-normal 1-dificil
-                    if (selecDificuldade == 1){//FACIL
+        case 'N':   Dificuldade = SelecionarDificuldade(); //seleciona dificuldade 1-normal 2-dificil
+                    if (Dificuldade == 1){//FACIL
                         Estado_de_Jogo.Dificuldade.VidasIniciais = 3;
                         Estado_de_Jogo.Dificuldade.DanoDaAura = 2;
                         Estado_de_Jogo.Dificuldade.RecargaAura = 2; //2 segundos
                     }
-                    else if (selecDificuldade == 2){//DIFICIL
+                    else if (Dificuldade == 2){//DIFICIL
                         Estado_de_Jogo.Dificuldade.VidasIniciais = 1;
                         Estado_de_Jogo.Dificuldade.DanoDaAura = 1;
-                        Estado_de_Jogo.Dificuldade.RecargaAura = 5; //2 segundos
+                        Estado_de_Jogo.Dificuldade.RecargaAura = 5; //5 segundos
                     }
 
-                        i=0;//numero do mapa
                         Estado_de_Jogo.VidasRestantes = Estado_de_Jogo.Dificuldade.VidasIniciais;
+                        Estado_de_Jogo.MapaAtual=mapainicial;
+                        do{
+                        retorno=Execucao(&Estado_de_Jogo);
+                        if(retorno==1){
+                        Estado_de_Jogo.MapaAtual++;
+                        }
+                        }
+                        while(retorno==1);
+                        if(retorno==2){
+                            if(Dificuldade==1){
+                                ConclusaoNormal();
+                            }
+                            else{
+                                ConclusaoDificil();
+                            }
+                        }
 
-                        Execucao(i,&Estado_de_Jogo.VidasRestantes,ControledoCovarde);
-                        printf("%d passando proximo mapa", Estado_de_Jogo.VidasRestantes);
-                        getch();
-                        getch();
-                        i=1;
-                        Execucao(i,ControledoCovarde, &Estado_de_Jogo);
             break;
 
         case 'c':
@@ -718,7 +730,7 @@ int main()
         case 'V': //Carregamento(); // com arquivo temp
             break;
 
-        case 39: Cheat_Code(&ControledoCovarde); //(APERTOU APOSTROFE '), ESCONDER NA RELEASE
+        case 39: Cheat_Code(&Estado_de_Jogo.CovardeAtivado, &Estado_de_Jogo.GreyskullAtivado); //(APERTOU APOSTROFE '), ESCONDER NA RELEASE
         //função leitura de cheat code, exemplos : covarde = vida infinita, greyskull = aumento do dano da aura, camaleao = muda cor do jogador
             break;
         }
