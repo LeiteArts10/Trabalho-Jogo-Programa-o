@@ -428,7 +428,7 @@ void PintaMapa(char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas){   // 
 
                 case(VAZIO): Cor = COR_VAZIO;
                                          break;
-                case(AURA): Cor = COR_AURA;
+                case(AURA): Cor = COR_AURA; //serve pra corrigir problemas de um save em que o player acabou de usar a aura dele
                                          break;
             }
             textbackground(Cor);
@@ -533,6 +533,8 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
                     case 'F': Aura(MapadoJogo, &Jogador);
                             break;
                     case 9 : Menu=1;
+                            clrscr();
+                            return 3;//código de retorno aqui ou o programa buga, e passa as fazes adiante quando se aperta TAB
                              //SalvamentoTemp(MapadoJogo, %Jogador.Vidas);
                             break;
 
@@ -701,6 +703,9 @@ int main()
                         if(retorno==1){
                         Estado_de_Jogo.MapaAtual++;
                         }
+                        else if (retorno == 3){
+                            printf("\n Abrindo Menu...\n");
+                        }
                         }
                         while(retorno==1);
                         if(retorno==2){
@@ -726,7 +731,7 @@ int main()
         case 'Q': Sair=1;
             break;
 
-        case 'v':
+        case 'v':   Execucao(&Estado_de_Jogo);
         case 'V': //Carregamento(); // com arquivo temp
             break;
 
