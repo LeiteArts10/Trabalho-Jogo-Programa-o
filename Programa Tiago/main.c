@@ -662,6 +662,11 @@ clrscr();
 
 }
 
+void LoopDeJogo(ESTADODEJOGO *estadodejogo){
+    //função responsável por iniciar o loop de jogo da execução, fazendo a progressão dos mapas
+    //o loop na main vem pra cá
+}
+
 int main()
     {
     char MapadoJogo[LINHAS][COLUNAS];
