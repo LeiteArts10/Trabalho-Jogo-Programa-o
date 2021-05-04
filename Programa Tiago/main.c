@@ -12,7 +12,8 @@
 #define NUMERODEVIDASFACIL 3
 #define NUMERODEVIDASDIFICIL 1
 #define TAMANHOAURA 2
-#define DANOAURA 1
+#define DANOAURAFACIL 2
+#define DANO AURADIFICIL 1
 
 #define VIDAZUMBI 1
 #define VIDATROLL 2
@@ -73,6 +74,7 @@ typedef struct Inimigo  // definicoes dos inimigos
     int Direcao;
     int Tipo;
     int steps;
+    int vida;
 
 } INIMIGO;
 
@@ -206,6 +208,7 @@ int LerMapa(char *NomedoMapa, char MapadoJogo[LINHAS][COLUNAS], int Linhas, int 
                               Inimigo[*QuantInimigos].Direcao = 0;
                               Inimigo[*QuantInimigos].steps = 0;
                               Inimigo[*QuantInimigos].Tipo = TIPO_ZUMBI;
+                              Inimigo[*QuantInimigos].vida = VIDAZUMBI;
                               *QuantInimigos = *QuantInimigos+1;
                               break;
                             }
@@ -216,6 +219,7 @@ int LerMapa(char *NomedoMapa, char MapadoJogo[LINHAS][COLUNAS], int Linhas, int 
                               Inimigo[*QuantInimigos].Direcao = 0;
                               Inimigo[*QuantInimigos].steps = 0;
                               Inimigo[*QuantInimigos].Tipo = TIPO_TROLL;
+                              Inimigo[*QuantInimigos].vida = VIDATROLL;
                               *QuantInimigos = *QuantInimigos+1;
                               break;
                             }
@@ -398,8 +402,20 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
 
 void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador)
 {
+    int recarga;//recarga em segundos, varia de acordo com dificuldade selecionada
+    int dano; //dano implicado aos inimigos, varia com dificuldade ou trapaça
+    int raio;
 
-printf("teste");
+    //pegar posição do jogador
+    //checar tempo restante até ser utilizada novamente
+    //checar o impacto dela no slot
+        //se for monstro aplica dano ao monstro(ISSO OU O MONSTRO CHECHA SE ELE BATE NA AURA, POSSIVELMENTE MELHOR)
+        //se for parede ou obstaculo não faz nada
+    //pintar no mapa por 0.5 até 1 segundo(a decidir)
+    //colocar delay de 3 segundos após ser executado
+
+
+    printf("teste");
 
 }
 
@@ -549,6 +565,8 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
         }
     }
     if(Colisao == 2){
+            //IF VIDA DE TODOS OS MONSTROS == 0
+            //ELSE PRINTF("\nNAO EH SEGURO COLETAR O TESOURO\nAINDA HA MONSTROS VIVOS\n")
         clrscr();
         gotoxy(20,10);
         textcolor(GREEN);
@@ -598,18 +616,46 @@ void Carregamento()
 
 }
 
-void Salvamento(ESTADODEJOGO Estado_de_Jogo)
+void Salvamento(ESTADODEJOGO *Estado_de_Jogo)
 {
+    FILE *ArquivoNomesDosSaves;//arquivo com o nome de todos os saves
+    FILE *ArquivoSave;//save especifico
     char nomeDoSave[20];
+    char nomeArquivo[20+4];//mudar constantes por defines
+    char nomeArquivoBin[20+4];
     printf("\nDigite o nome com que deseja salvar o arquivo");
     scanf("%s",nomeDoSave);
 
-    //fopen()//escrever em um arquivo txt o nome dos saves
+    *nomeArquivo = strcmp(nomeDoSave,".txt");
+    *nomeArquivoBin = strcmp(nomeDoSave,".dat");
 
+    //fopen()//escrever em um arquivo txt o nome dos saves
+    if (!(ArquivoNomesDosSaves = fopen("JogosSalvos.txt","a+")))//escreve no final do arquivo, lista dos saves que podem serr abertos
+    {
+        printf("Erro de abertura\n");
+    }
+    else
+    {
+        printf("Adicionando %s a Lista de saves\n", nomeArquivo);
+        fprintf("%s\n", nomeArquivo);
+    }
+    fclose(ArquivoNomesDosSaves);
     //fclose()//fechar o arquivo com o nome dos saves
 
     //fopen()//escrever estado de jogo em arquivo binario com o nome do save
-
+    if (!(ArquivoSave = fopen(nomeArquivoBin,"w")))//abre arquivo para escrita, se não existir cria novo
+    {
+        printf("Erro de abertura\n");
+    }
+    else
+    {
+        printf("Escrevendo Informacoes de %s\n", nomeArquivoBin);
+        if(fwrite(Estado_de_Jogo,sizeof(ESTADODEJOGO),1,ArquivoSave) !=1);//escreve Estado de jogo atual como arquivo binário
+        {
+        printf("Erro de escrita!\n");
+        }
+    }
+    fclose(ArquivoSave);
     //fclose()//fechar o arquivo
 
 }
@@ -622,49 +668,69 @@ void Cheat_Code(int *covarde, int *greyskull)
 
 
 //Run the code to check the password//
-do
-{
-    fflush(stdin);
-    printf("Insira o Cheat Code: ");
-    scanf("%s", cheatcode);
-    validacao = strcmp(cheatcode,"covarde");//torna vidas infinitas
-    if (validacao == 0)
+    do
     {
-        printf("\n Accepted type 1");
-        *covarde=1;
-    }
-    else
-    {
-        validacao = strcmp(cheatcode,"greyskull");//buff na aura
+        fflush(stdin);
+        printf("Insira o Cheat Code: ");
+        scanf("%s", cheatcode);
+        validacao = strcmp(cheatcode,"covarde");//torna vidas infinitas
         if (validacao == 0)
         {
-            printf("\n Accepted type 2");
-            *greyskull=1;
+            printf("\n Accepted type 1");
+            *covarde=1;
         }
         else
         {
-            printf("Wrong password\n");//codigo errado
+            validacao = strcmp(cheatcode,"greyskull");//buff na aura
+            if (validacao == 0)
+            {
+                printf("\n Accepted type 2");
+                *greyskull=1;
+            }
+            else
+            {
+                printf("Wrong password\n");//codigo errado
+            }
         }
-    }
-    printf("\n %s", cheatcode);
-    printf("\nTentar Novamente?\n(S)im ou (N)ao?\n");
-    fflush(stdin);
-    switch (getch())//laço de repetição
-    {
-        case 's':
-        case 'S': repeticao = 0; break;
-        case 'n':
-        case 'N': repeticao = 1; break;
-        default: repeticao = 0; break;
-    }
-}while (repeticao == 0);
-clrscr();
+        printf("\n %s", cheatcode);
+        printf("\nTentar Novamente?\n(S)im ou (N)ao?\n");
+        fflush(stdin);
+        switch (getch())//laço de repetição
+        {
+            case 's':
+            case 'S': repeticao = 0; break;
+            case 'n':
+            case 'N': repeticao = 1; break;
+            default: repeticao = 0; break;
+        }
+    }while (repeticao == 0);
+    clrscr();
 
 }
 
-void LoopDeJogo(ESTADODEJOGO *estadodejogo){
+void LoopDeJogo(ESTADODEJOGO *Estado_de_Jogo, int Dificuldade){
     //função responsável por iniciar o loop de jogo da execução, fazendo a progressão dos mapas
     //o loop na main vem pra cá
+int retorno;
+
+    do{
+        retorno=Execucao(Estado_de_Jogo);
+        if(retorno==1){
+        Estado_de_Jogo->MapaAtual++;
+        }
+        else if (retorno == 3){
+            printf("\n Abrindo Menu...\n");
+        }
+    }while(retorno==1);
+    if(retorno==2){
+        if(Dificuldade==1){
+        ConclusaoNormal();
+        }
+    else{
+        ConclusaoDificil();
+        }
+    }
+
 }
 
 int main()
@@ -674,7 +740,6 @@ int main()
     char Selecao;
     int mapainicial=0;
     int Dificuldade;
-    int retorno;
     ESTADODEJOGO Estado_de_Jogo;
 
     //inicialização de estado de jogo
@@ -703,24 +768,8 @@ int main()
 
                         Estado_de_Jogo.VidasRestantes = Estado_de_Jogo.Dificuldade.VidasIniciais;
                         Estado_de_Jogo.MapaAtual=mapainicial;
-                        do{
-                        retorno=Execucao(&Estado_de_Jogo);
-                        if(retorno==1){
-                        Estado_de_Jogo.MapaAtual++;
-                        }
-                        else if (retorno == 3){
-                            printf("\n Abrindo Menu...\n");
-                        }
-                        }
-                        while(retorno==1);
-                        if(retorno==2){
-                            if(Dificuldade==1){
-                                ConclusaoNormal();
-                            }
-                            else{
-                                ConclusaoDificil();
-                            }
-                        }
+
+                    LoopDeJogo(&Estado_de_Jogo, Dificuldade);
 
             break;
 
@@ -736,7 +785,7 @@ int main()
         case 'Q': Sair=1;
             break;
 
-        case 'v':   Execucao(&Estado_de_Jogo);
+        case 'v':   LoopDeJogo(&Estado_de_Jogo, Dificuldade);
         case 'V': //Carregamento(); // com arquivo temp
             break;
 
