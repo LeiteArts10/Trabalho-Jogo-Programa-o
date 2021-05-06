@@ -101,7 +101,7 @@ void Introducao()// mensagem de introducao
      printf("\tComandos:\n");
      printf("\tMovimento\t\tW/S/A/D\n\tAura Magica\t\tF\n\tMenu\t\t\tTAB\n\n");
      printf("\t\t\t\t\tBoa Sorte!!!\n\n");
-     printf("Aperte qualquer tecla");
+     printf("Aperte Enter para continuar");
      fflush(stdin);
      getchar();
      clrscr();
@@ -604,6 +604,7 @@ clrscr();
 }
 
 int Carregamento(ESTADODEJOGO *Estado_de_Jogo){
+    ESTADODEJOGO EstadoArquivo;
     FILE *ArquivoNomesDosSaves;
     FILE *SaveBinEscolhido;
     char str[TAMSTR];
@@ -625,19 +626,17 @@ int Carregamento(ESTADODEJOGO *Estado_de_Jogo){
     //Usuario escreve o nome do save que deseja carregar
     printf("\nEscreva o nome do save que deseja carregar\n");
     gets(NomeEscolhido);
-
     snprintf(NomeArquivoBin, sizeof NomeArquivoBin, "%s.dat", NomeEscolhido);
-
-    printf("%s",NomeArquivoBin);
 
     //abrir arquivo.dat com os dados do save
     if (!(SaveBinEscolhido = fopen(NomeArquivoBin,"rb")))
     {
         printf("Erro na abertura do arquivo de save binario\n");
+        getch();
     }
     else
     {
-        if(fread(&Estado_de_Jogo,sizeof(ESTADODEJOGO),1,NomeArquivoBin) == 1)
+        if(fread(&EstadoArquivo,sizeof(ESTADODEJOGO),1,NomeArquivoBin) == 1)
         {
             printf("sucesso na leitura de save binario!!\n");
         }
@@ -645,12 +644,11 @@ int Carregamento(ESTADODEJOGO *Estado_de_Jogo){
             printf("Erro na leitura de save binario!!\n");
         }
     }
-    printf("\nteste");
     //alterar estado de jogo
 
 
     //saida correta permite iniciar loop de jogo na main
-
+    clrscr();
 }
 
 int Salvamento(ESTADODEJOGO *Estado_de_Jogo)
@@ -690,6 +688,7 @@ int Salvamento(ESTADODEJOGO *Estado_de_Jogo)
         if(fwrite(&Estado_de_Jogo,sizeof(ESTADODEJOGO),1,ArquivoSave) ==1)
         {
         fflush(ArquivoSave);//pre-salvamento
+        printf("Arquivo Binario Salvo\n");
         }
         else{
             printf("erro escrita binario\n");
@@ -818,7 +817,7 @@ int main()
             break;
 
         case 'c':
-        case 'C': Carregamento(&Estado_de_Jogo);  // com arquivo  salvo
+        case 'C': Carregamento(&Estado_de_Jogo);
             break;
 
         case 's':

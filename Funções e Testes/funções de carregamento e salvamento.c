@@ -77,6 +77,7 @@ int Salvamento(ESTADODEJOGO *Estado_de_Jogo)
 
 //Carregamento
 int Carregamento(ESTADODEJOGO *Estado_de_Jogo){
+    ESTADODEJOGO EstadoArquivo;
     FILE *ArquivoNomesDosSaves;
     FILE *SaveBinEscolhido;
     char str[TAMSTR];
@@ -110,7 +111,7 @@ int Carregamento(ESTADODEJOGO *Estado_de_Jogo){
     }
     else
     {
-        if(fread(&Estado_de_Jogo,sizeof(ESTADODEJOGO),1,NomeArquivoBin) == 1)
+        if(fread(&EstadoArquivo,sizeof(ESTADODEJOGO),1,NomeArquivoBin) == 1)
         {
             printf("sucesso na leitura de save binario!!\n");
         }
