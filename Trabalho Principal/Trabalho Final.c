@@ -633,12 +633,16 @@ int Carregamento(ESTADODEJOGO *Estado_de_Jogo){
     {
         printf("Erro na abertura do arquivo de save binario\n");
         getch();
+        getch();
     }
     else
     {
-        if(fread(&EstadoArquivo,sizeof(ESTADODEJOGO),1,NomeArquivoBin) == 1)
+
+        if(fread(&EstadoArquivo,sizeof(ESTADODEJOGO),1,SaveBinEscolhido) == 1)
         {
-            printf("sucesso na leitura de save binario!!\n");
+            printf("teste vidas restantes arquivo: %d\n", EstadoArquivo.VidasRestantes);
+            printf("mapa atual: %d\n", EstadoArquivo.MapaAtual);
+            getchar();
         }
         else{
             printf("Erro na leitura de save binario!!\n");
@@ -660,6 +664,7 @@ int Salvamento(ESTADODEJOGO *Estado_de_Jogo)
     char nomeArquivoBin[TAMSTR+4];
     printf("\nDigite o nome com que deseja salvar o arquivo: ");
     gets(nomeDoSave);
+    ESTADODEJOGO EstadoSalvamento;
 
     snprintf(nomeArquivoMapa, sizeof nomeArquivoMapa, "%s.txt", nomeDoSave);
     snprintf(nomeArquivoBin, sizeof nomeArquivoBin, "%s.dat", nomeDoSave);
@@ -685,7 +690,7 @@ int Salvamento(ESTADODEJOGO *Estado_de_Jogo)
     }
     else
     {
-        if(fwrite(&Estado_de_Jogo,sizeof(ESTADODEJOGO),1,ArquivoSave) ==1)
+        if(fwrite(Estado_de_Jogo,sizeof(ESTADODEJOGO),1,ArquivoSave) ==1)
         {
         fflush(ArquivoSave);//pre-salvamento
         printf("Arquivo Binario Salvo\n");
@@ -767,10 +772,10 @@ void LoopDeJogo(ESTADODEJOGO *Estado_de_Jogo, int Dificuldade){
     }while(retorno==1);
     if(retorno==2){
         if(Dificuldade==1){
-        ConclusaoNormal();
+            ConclusaoNormal();
         }
-    else{
-        ConclusaoDificil();
+        else{
+            ConclusaoDificil();
         }
     }
 
