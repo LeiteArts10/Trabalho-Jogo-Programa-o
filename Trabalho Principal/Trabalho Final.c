@@ -111,10 +111,10 @@ void Introducao()// mensagem de introducao
 void ConclusaoNormal()  //Mensagem dada após terminar o jogo na dificuldade padrao
 {
      printf("\n\t\t\tParabens, Voce Venceu!!!\n\n");
-     printf("\tVoce recuperou o tesouro de seu povo e agora sua cidade podera viver em paz\n\n");
-     printf("\tSe desejar, pode reviver sua aventura jogando com uma outra dificuldade\n");
+     printf("\tVoce recuperou o tesouro de seu povo e agora \n\tsua cidade podera viver em paz\n\n");
+     printf("\tSe desejar, pode reviver sua aventura jogando \n\tcom uma outra dificuldade\n");
 
-     printf("\nAperte qualquer tecla para ir ao menu inicial");
+     printf("\n/tAperte qualquer tecla para ir ao menu");
      fflush(stdin);
      getchar();
      clrscr();
@@ -305,15 +305,6 @@ void Move(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, int X, int Y, int *
 }
 
 
-int SelecionaDirecao(){  // selecione direcao do monstro
-
-    int N;
-    N = rand()%4;
-
-    return N;
-
-}
-
 
 void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMONSTROS], int Quant, PLAYER *Jogador, int *Controle, ESTADODEJOGO *estadodejogo){
 
@@ -347,20 +338,20 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
                     break;
         }
         Simbolo = MapadoJogo[Inimigos[I].PosY + Y][Inimigos[I].PosX + X];
-        if((Simbolo == OBSTACULO && Inimigos[I].Tipo == TIPO_TROLL) || (Inimigos[I].steps > 4) || Simbolo == PAREDE){
+        if((Simbolo == OBSTACULO && Inimigos[I].Tipo == TIPO_TROLL && Inimigos[I].vida>0) || (Inimigos[I].steps > 4) || Simbolo == PAREDE){
             while(Inimigos[I].Direcao == rand()%4){
                 Inimigos[I].Direcao = rand()%4;
             }
             Inimigos[I].steps = 0;
         }
-        else if(Inimigos[I].Tipo == TIPO_ZUMBI && MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == OBSTACULO){
+        else if(Inimigos[I].Tipo == TIPO_ZUMBI && Inimigos[I].vida>0 && MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == OBSTACULO){
 
             MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = OBSTACULO;
             (Inimigos[I].PosY) = (Inimigos[I].PosY) + Y;
             (Inimigos[I].PosX) = (Inimigos[I].PosY) + X;
             Inimigos[I].steps = Inimigos[I].steps + 1;
         }
-        else if((Inimigos[I].Tipo == TIPO_ZUMBI && MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO) || (Inimigos[I].Tipo == TIPO_ZUMBI && MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO)){
+        else if((Inimigos[I].Tipo == TIPO_ZUMBI && Inimigos[I].vida>0 && MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO) || (Inimigos[I].Tipo == TIPO_ZUMBI && Inimigos[I].vida>0 && MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO)){
             MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
             (Inimigos[I].PosY) = (Inimigos[I].PosY) + Y;
             (Inimigos[I].PosX) = (Inimigos[I].PosX) + X;
@@ -386,37 +377,100 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
 
 
         switch(Inimigos[I].Tipo){
-            case TIPO_TROLL: if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
+            case TIPO_TROLL: if(Inimigos[I].vida>0){
+                if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
                                         MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
                                     }
                                    MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TROLL;
+            }
                                    break;
-            case TIPO_ZUMBI: if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
+            case TIPO_ZUMBI: if(Inimigos[I].vida>0){
+                if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
                                         MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
                                     }
                                     else if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] != OBSTACULO)
                                         MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = ZUMBI;
+            }
                                     break;
         }
     }
 }
 
-void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador)
-{
-    int recarga;//recarga em segundos, varia de acordo com dificuldade selecionada
-    int dano; //dano implicado aos inimigos, varia com dificuldade ou trapaça
-    int raio;
+void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado, int quantinimigos, INIMIGO inimigos[MAXIMODEMONSTROS]){
+    int recarga, posx, posy, reducaox, reducaoy, aumentox, aumentoy, i, j, k;
+    recarga= estado.RecargaAura;
+    posx=Jogador->PosX;
+    posy=Jogador->PosY;
 
-    //pegar posição do jogador
+    if(posx==1){
+        reducaox=0;
+    }
+    else if(posx==2){
+        reducaox=1;
+    }
+    else if(posx==3){
+        reducaox=2;
+    }
+    else{
+        reducaox=3;
+    }
+
+
+    if(posy==1){
+        reducaoy=0;
+    }
+    else if(posy==2){
+        reducaoy=1;
+    }
+     else if(posy==3){
+        reducaoy=2;
+    }
+    else{
+        reducaoy=3;
+    }
+
+    if(posy==(LINHAS-2)){
+        aumentoy=0;
+    }
+    else if(posy==(LINHAS-3)){
+        aumentoy=1;
+    }
+     else if(posy==(LINHAS-4)){
+        aumentoy=2;
+    }
+    else{
+        aumentoy=3;
+    }
+
+    if(posx==(COLUNAS-2)){
+        aumentox=0;
+    }
+    else if(posx==(COLUNAS-3)){
+        aumentox=1;
+    }
+     else if(posx==(COLUNAS-4)){
+        aumentox=2;
+    }
+    else{
+        aumentox=3;
+    }
+
+    for(i=(posx-reducaox);i<=(posx+aumentox);i++){
+        for(j=(posy-reducaoy);j<=(posy+aumentoy);j++){
+            if(MapadoJogo[j][i]!=JOGADOR && MapadoJogo[j][i]!=OBSTACULO && MapadoJogo[j][i]!=TESOURO){
+                MapadoJogo[j][i]=AURA;
+            }
+        }
+    }
+
+    for(k=0; k<=quantinimigos; k++){
+        if(inimigos[k].PosX>=(posx-reducaox) && inimigos[k].PosX<=(posx+aumentox)){
+            if(inimigos[k].PosY>=(posy-reducaoy) && inimigos[k].PosY<=(posy+aumentoy)){
+                inimigos[k].vida--;
+            }
+        }
+    }
     //checar tempo restante até ser utilizada novamente
-    //checar o impacto dela no slot
-        //se for monstro aplica dano ao monstro(ISSO OU O MONSTRO CHECHA SE ELE BATE NA AURA, POSSIVELMENTE MELHOR)
-        //se for parede ou obstaculo não faz nada
-    //pintar no mapa por 0.5 até 1 segundo(a decidir)
-    //colocar delay de 3 segundos após ser executado
-
-
-    printf("teste");
 
 }
 
@@ -455,15 +509,7 @@ void PintaMapa(char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas){   // 
     }
 }
 
-void SalvamentoTemp(char MapadoJogo, ESTADODEJOGO Estado_de_Jogo)//exporta estado atual do mapa para arquivo texto e ESTADO DE JOGO para arquivo binario
-{
 
-    //fopen(mapa temp)//escreve em arquivo txt o estado atual do mapa
-
-
-    //fopen(estado temp)//escreve estado de jogo em arquivo binario
-
-}
 
 void HideCursor()   //apaga o ponteiro
 {
@@ -472,7 +518,7 @@ void HideCursor()   //apaga o ponteiro
 }
 
 int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
-    int I;
+    int I, j, k;
     int Menu = 0;
     ESTADODEJOGO estadoparamover;
     int testeproximomapa;
@@ -512,10 +558,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
             }
             estadoparamover= *estadodejogo;
             Controle = 0;
-            for(I = 0; I < QuantInimigos; I++)
-            {
-                Inimigos[I].Direcao = SelecionaDirecao();
-            }
+
             while((Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 1 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 2 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 3 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 4  && Menu != 1)
             {
                 if(kbhit())
@@ -547,7 +590,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
                     case 'D': Move(MapadoJogo, &Jogador, +1, 0, &Controle);
                             break;
                     case 'f':
-                    case 'F': Aura(MapadoJogo, &Jogador);
+                    case 'F': Aura(MapadoJogo, &Jogador, *estadodejogo, QuantInimigos, Inimigos);
                             break;
                     case 9 : Menu=1;
                             clrscr();
@@ -557,7 +600,13 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
 
                 }
                 PintaMapa(MapadoJogo, LINHAS, COLUNAS);
-
+                for(j=0;j<LINHAS;j++){
+                    for(k=0;k<COLUNAS;k++){
+                        if(MapadoJogo[j][k]==AURA){
+                            MapadoJogo[j][k]=VAZIO;
+                        }
+                    }
+                }
             }
         }
         else
@@ -833,8 +882,8 @@ int main()
         case 'Q': Sair=1;
             break;
 
-        case 'v':   LoopDeJogo(&Estado_de_Jogo, Dificuldade);
-        case 'V': //Carregamento(); // com arquivo temp
+        case 'v':
+        case 'V': LoopDeJogo(&Estado_de_Jogo, Dificuldade);
             break;
 
         case 39: Cheat_Code(&Estado_de_Jogo.CovardeAtivado, &Estado_de_Jogo.GreyskullAtivado); //(APERTOU APOSTROFE '), ESCONDER NA RELEASE
