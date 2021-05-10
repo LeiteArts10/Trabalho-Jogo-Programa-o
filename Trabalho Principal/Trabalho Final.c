@@ -26,6 +26,7 @@
 
 #define TIPO_ZUMBI 5
 #define TIPO_TROLL 6
+#define TIPO_MORTO 7
 
 #define COLUNAS 60
 #define LINHAS 23
@@ -38,9 +39,9 @@
 #define TROLL 'T'
 #define VAZIO ' '
 #define AURA 'O'
-//#define AURA_CHEFAO_PREPARO 'C' "telegrafa" ataque do chefao, dando tempo de reacao pro jogador, nao causa dano
-//#define AURA_CHEFAO_ATIVA 'D' aura ativa, causa perda de vida se jogador entrar em contato
+#define CADAVER 'M'
 
+#define COR_CADAVER 8
 #define COR_PAREDE 8
 #define COR_OBSTACULO 2
 #define COR_JOGADOR 9
@@ -49,8 +50,6 @@
 #define COR_TROLL 16
 #define COR_VAZIO 7
 #define COR_AURA 15
-//#define COR_AURACHEFAO_PREPARO X
-//#define COR_AURACHEFAO_ATIVA X
 
 #define MAXIMODEMONSTROS 15
 
@@ -264,6 +263,7 @@ int ControledeColisao(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador){  // ve
                             break;
         case(AURA): Cod = 6; //se a posição a ser ocupada é uma Aura ele retorna código 6 para a função de movimentação
                             break;
+        case(CADAVER): Cod = 7; break; //posição a ser ocupada é um cadaver
         default: break;
     }
 
@@ -300,11 +300,12 @@ void Move(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, int X, int Y, int *
         case 5: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = JOGADOR;
                 break;
         case 6: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = AURA;
+                break;
+        case 7: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = JOGADOR;
+                break;
     }
 
 }
-
-
 
 void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMONSTROS], int Quant, PLAYER *Jogador, int *Controle, ESTADODEJOGO *estadodejogo){
 
@@ -323,19 +324,27 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
 
     for(I = 0; I < Quant; I++)
     {
+        if (Inimigos[I].vida >0){
         switch(Inimigos[I].Direcao){
-            case 0: Y = -1;
-                    X = 0;
-                    break;
-            case 1: X = -1;
-                    Y = 0;
-                    break;
-            case 2: Y = 1;
-                    X = 0;
-                    break;
-            case 3: X = 1;
-                    Y = 0;
-                    break;
+                case 0: Y = -1;
+                        X = 0;
+                        break;
+                case 1: X = -1;
+                        Y = 0;
+                        break;
+                case 2: Y = 1;
+                        X = 0;
+                        break;
+                case 3: X = 1;
+                        Y = 0;
+                        break;
+                }
+        }
+        else {
+            Inimigos[I].Tipo = TIPO_MORTO;
+            Inimigos[I].PosX = 0;
+            Inimigos[I].PosY = 0;
+            Inimigos[I].steps = 0;
         }
         Simbolo = MapadoJogo[Inimigos[I].PosY + Y][Inimigos[I].PosX + X];
         if((Simbolo == OBSTACULO && Inimigos[I].Tipo == TIPO_TROLL && Inimigos[I].vida>0) || (Inimigos[I].steps > 4) || Simbolo == PAREDE){
@@ -357,6 +366,12 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
             (Inimigos[I].PosX) = (Inimigos[I].PosX) + X;
             Inimigos[I].steps = Inimigos[I].steps + 1;
 
+        }
+        else if((Simbolo == OBSTACULO && Inimigos[I].Tipo == TIPO_MORTO && Inimigos[I].vida<=0) || (Inimigos[I].steps > 4) || Simbolo == PAREDE){
+            while(Inimigos[I].Direcao == rand()%4){
+                Inimigos[I].Direcao = rand()%4;
+            }
+            Inimigos[I].steps = 0;
         }
         else if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == MapadoJogo[Jogador -> PosY][Jogador -> PosX]){
             *Controle = 1;
@@ -385,20 +400,29 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
             }
                                    break;
             case TIPO_ZUMBI: if(Inimigos[I].vida>0){
-                if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
+                                if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
                                         MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
-                                    }
-                                    else if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] != OBSTACULO)
+                                }
+                                else if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] != OBSTACULO)
                                         MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = ZUMBI;
             }
-                                    break;
+            break;
+            case TIPO_MORTO: if(Inimigos[I].vida<=0){
+                                if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
+                                        MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
+                                }
+                                else if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] =! OBSTACULO){
+                                        MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = CADAVER;
+                                }
+            break;
+            }
         }
     }
 }
 
 void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado, int quantinimigos, INIMIGO inimigos[MAXIMODEMONSTROS]){
     int recarga, posx, posy, reducaox, reducaoy, aumentox, aumentoy, i, j, k;
-    recarga= estado.RecargaAura;
+    recarga = estado.RecargaAura;
     posx=Jogador->PosX;
     posy=Jogador->PosY;
 
@@ -467,12 +491,14 @@ void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado
         if(inimigos[k].PosX>=(posx-reducaox) && inimigos[k].PosX<=(posx+aumentox)){
             if(inimigos[k].PosY>=(posy-reducaoy) && inimigos[k].PosY<=(posy+aumentoy)){
                 inimigos[k].vida = inimigos[k].vida - estado.Dificuldade.DanoDaAura;
-                if (estado.GreyskullAtivado == 1){
+                if (estado.GreyskullAtivado == 1){//controle grayskull ativado
                     inimigos[k].vida = 0;
                 }
             }
         }
     }
+
+
     //checar tempo restante até ser utilizada novamente
 
 }
@@ -504,6 +530,8 @@ void PintaMapa(char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas){   // 
                                          break;
                 case(AURA): Cor = COR_AURA; //serve pra corrigir problemas de um save em que o player acabou de usar a aura dele
                                          break;
+                case(CADAVER): Cor = COR_CADAVER;
+                                    break;
             }
             textbackground(Cor);
             gotoxy(X+1, Y+1);
@@ -511,8 +539,6 @@ void PintaMapa(char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas){   // 
         }
     }
 }
-
-
 
 void HideCursor()   //apaga o ponteiro
 {
@@ -529,6 +555,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
     int QuantInimigos;
     int Controle = 0;
     int Colisao=0;
+    int todosMortos = 0;
     char Tecla = 'u';
     int timerint = 0;
     char nomeArquivo[10];
@@ -593,7 +620,13 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
                     case 'D': Move(MapadoJogo, &Jogador, +1, 0, &Controle);
                             break;
                     case 'f':
-                    case 'F': Aura(MapadoJogo, &Jogador, *estadodejogo, QuantInimigos, Inimigos);
+                    case 'F':   //if recarga = 0;
+                                //executa função aura
+                                Aura(MapadoJogo, &Jogador, *estadodejogo, QuantInimigos, Inimigos);
+                                //timerrestart
+
+                                //else
+                                //nada
                             break;
                     case 9 : Menu=1;
                             clrscr();
@@ -617,9 +650,11 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
             printf("Erro na leitura do mapa\n");
         }
     }
-    if(Colisao == 2){
+    if(Colisao == 2 ){
             //IF VIDA DE TODOS OS MONSTROS == 0
             //ELSE PRINTF("\nNAO EH SEGURO COLETAR O TESOURO\nAINDA HA MONSTROS VIVOS\n")
+
+
         clrscr();
         gotoxy(20,10);
         textcolor(GREEN);
