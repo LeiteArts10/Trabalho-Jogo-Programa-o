@@ -155,7 +155,7 @@ int SelecionarDificuldade(){
                     break;
             default: printf("\n\tErro, selecione uma dificuldade valida\n");
                     valido = 0;
-                    scanf("%d", &nivelDeDificuldade);
+                    scanf(" %d", &nivelDeDificuldade);
                     break;
         }
     }while (valido == 0);
