@@ -21,6 +21,10 @@
 #define VIDAZUMBI 2
 #define VIDATROLL 4
 
+#define MATOUTROLL 20
+#define MATOUZUMBI 10
+#define COLETOUTESOURO 100
+
 #define UP_DIRECTION 1
 #define RIGHT_DIRECTION 2
 #define DOWN_DIRECTION 3
@@ -85,6 +89,7 @@ typedef struct Estado_de_Jogo //definições do estado de jogo, usado para escreve
     int VidasRestantes;
     int MapaAtual;
     DIFICULDADE Dificuldade;
+    int Pontuacao;
 
     //trapaças
     int CovardeAtivado;     //0-desativado      1-ativado
@@ -114,7 +119,7 @@ void ConclusaoNormal()  //Mensagem dada após terminar o jogo na dificuldade padr
      printf("\tVoce recuperou o tesouro de seu povo e agora \n\tsua cidade podera viver em paz\n\n");
      printf("\tSe desejar, pode reviver sua aventura jogando \n\tcom uma outra dificuldade\n");
 
-     printf("\n/tAperte qualquer tecla para ir ao menu");
+     printf("\n\tAperte qualquer tecla para ir ao menu");
      fflush(stdin);
      getchar();
      clrscr();
@@ -312,16 +317,6 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
 
     int I, X = 0, Y = 0;
     char Simbolo;
-    if (estadodejogo->VidasRestantes>1)
-    {
-        textcolor(BLACK);
-        printf("\nVidas restantes: %d", estadodejogo->VidasRestantes);
-    }
-    else
-    {
-        textcolor(RED);
-        printf("\nVidas restantes: %d", estadodejogo->VidasRestantes);
-    }
 
     for(I = 0; I < Quant; I++)
     {
@@ -499,6 +494,7 @@ void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado
     }
 
 
+
     //checar tempo restante até ser utilizada novamente
 
 }
@@ -547,7 +543,7 @@ void HideCursor()   //apaga o ponteiro
 }
 
 int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
-    int I, j, k;
+    int I, j, k,l;
     int Menu = 0;
     ESTADODEJOGO estadoparamover;
     int testeproximomapa;
@@ -555,7 +551,6 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
     int QuantInimigos;
     int Controle = 0;
     int Colisao=0;
-    int todosMortos = 0;
     char Tecla = 'u';
     int timerint = 0;
     char nomeArquivo[10];
@@ -587,7 +582,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
                 estadodejogo->VidasRestantes=estadodejogo->VidasRestantes;
                 }
             }
-            estadoparamover= *estadodejogo;
+            estadoparamover = *estadodejogo;
             Controle = 0;
 
             while((Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 1 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 2 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 3 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 4  && Menu != 1)
@@ -607,6 +602,20 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
                     timerint++;
                     timer = clock();
                 }
+
+                if (estadodejogo->VidasRestantes>1)
+                {
+                    textcolor(BLACK);
+                    printf("\nVidas restantes: %d", estadodejogo->VidasRestantes);
+                }
+                else
+                {
+                    textcolor(RED);
+                    printf("\nVidas restantes: %d", estadodejogo->VidasRestantes);
+                    textcolor(BLACK);
+                }
+                printf("\nPontuacao: %d",estadodejogo->Pontuacao);
+
                 switch(Tecla)
                 {   case 'w':
                     case 'W': Move(MapadoJogo, &Jogador, 0, -1, &Controle);
@@ -649,6 +658,27 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
             printf("Erro na leitura do mapa\n");
         }
     }
+
+    //pontuação final do nivel
+    for(l=0;l<QuantInimigos;l++){
+        if (Inimigos[l].vida <=0){
+            if (Inimigos[l].Tipo == TROLL){
+                estadodejogo->Pontuacao = estadodejogo->Pontuacao + MATOUTROLL;
+            }
+            if (Inimigos[l].Tipo == ZUMBI){
+                estadodejogo->Pontuacao = estadodejogo->Pontuacao + MATOUZUMBI;
+            }
+        }
+    }
+        clrscr();
+        gotoxy(20,10);
+        textcolor(BLACK);
+        printf("PONTUACAO: %d", estadodejogo->Pontuacao);
+        Sleep(900);
+        clrscr();
+
+
+
     if(Colisao == 2 ){
             //IF VIDA DE TODOS OS MONSTROS == 0
             //ELSE PRINTF("\nNAO EH SEGURO COLETAR O TESOURO\nAINDA HA MONSTROS VIVOS\n")
@@ -658,6 +688,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
         gotoxy(20,10);
         textcolor(GREEN);
         printf("PASSOU DE FASE");
+        textcolor(BLACK);
         Sleep(1200);//tempo de espera
         clrscr();
 
