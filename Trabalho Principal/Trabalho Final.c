@@ -14,7 +14,9 @@
 #define NUMERODEVIDASDIFICIL 1
 #define TAMANHOAURA 2
 #define DANOAURAFACIL 2
-#define DANO AURADIFICIL 1
+#define DANOAURADIFICIL 1
+#define RECARGAFACIL 3000 //tempo em milisegundos para recarregar a aura magica
+#define RECARGADIFICIL 5000
 
 #define VIDAZUMBI 2
 #define VIDATROLL 4
@@ -83,7 +85,6 @@ typedef struct Estado_de_Jogo //definições do estado de jogo, usado para escreve
     int VidasRestantes;
     int MapaAtual;
     DIFICULDADE Dificuldade;
-    int RecargaAura; //tempo até poder usar a aura novamente
 
     //trapaças
     int CovardeAtivado;     //0-desativado      1-ativado
@@ -421,8 +422,7 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
 }
 
 void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado, int quantinimigos, INIMIGO inimigos[MAXIMODEMONSTROS]){
-    int recarga, posx, posy, reducaox, reducaoy, aumentox, aumentoy, i, j, k;
-    recarga = estado.RecargaAura;
+    int posx, posy, reducaox, reducaoy, aumentox, aumentoy, i, j, k;
     posx=Jogador->PosX;
     posy=Jogador->PosY;
 
@@ -565,6 +565,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
     timebegin = clock();
     timer = clock();
     srand(time(NULL));
+    int timeAtual = clock(), timeUltimoUso = clock();
 
     snprintf(nomeArquivo, sizeof nomeArquivo, "mapa%d.txt", estadodejogo->MapaAtual);//transforma numero mapa em string pra carregar diferentes mapas
 
@@ -620,13 +621,11 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
                     case 'D': Move(MapadoJogo, &Jogador, +1, 0, &Controle);
                             break;
                     case 'f':
-                    case 'F':   //if recarga = 0;
-                                //executa função aura
-                                Aura(MapadoJogo, &Jogador, *estadodejogo, QuantInimigos, Inimigos);
-                                //timerrestart
-
-                                //else
-                                //nada
+                    case 'F':   timeAtual = clock();
+                                if (timeAtual > timeUltimoUso + estadodejogo->Dificuldade.RecargaAura){
+                                    Aura(MapadoJogo, &Jogador, *estadodejogo, QuantInimigos, Inimigos);
+                                    timeUltimoUso = clock();
+                                }
                             break;
                     case 9 : Menu=1;
                             clrscr();
@@ -881,7 +880,6 @@ int main()
     Estado_de_Jogo.CovardeAtivado=0;
     Estado_de_Jogo.GreyskullAtivado=0;
     Estado_de_Jogo.MapaAtual=0;
-    Estado_de_Jogo.RecargaAura=0;
 
     Introducao();//ARRUMAR CORES
     while(Sair==0)
@@ -891,14 +889,14 @@ int main()
         case 'n':
         case 'N':   Dificuldade = SelecionarDificuldade(); //seleciona dificuldade 1-normal 2-dificil
                     if (Dificuldade == 1){//FACIL
-                        Estado_de_Jogo.Dificuldade.VidasIniciais = 3;
-                        Estado_de_Jogo.Dificuldade.DanoDaAura = 2;
-                        Estado_de_Jogo.Dificuldade.RecargaAura = 2; //2 segundos
+                        Estado_de_Jogo.Dificuldade.VidasIniciais = NUMERODEVIDASFACIL;
+                        Estado_de_Jogo.Dificuldade.DanoDaAura = DANOAURAFACIL;
+                        Estado_de_Jogo.Dificuldade.RecargaAura = RECARGAFACIL; //3 segundos
                     }
                     else if (Dificuldade == 2){//DIFICIL
-                        Estado_de_Jogo.Dificuldade.VidasIniciais = 1;
-                        Estado_de_Jogo.Dificuldade.DanoDaAura = 1;
-                        Estado_de_Jogo.Dificuldade.RecargaAura = 5; //5 segundos
+                        Estado_de_Jogo.Dificuldade.VidasIniciais = NUMERODEVIDASDIFICIL;
+                        Estado_de_Jogo.Dificuldade.DanoDaAura = DANOAURAFACIL;
+                        Estado_de_Jogo.Dificuldade.RecargaAura = RECARGADIFICIL; //5 segundos
                     }
 
                         Estado_de_Jogo.VidasRestantes = Estado_de_Jogo.Dificuldade.VidasIniciais;
