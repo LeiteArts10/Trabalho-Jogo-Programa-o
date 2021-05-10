@@ -16,8 +16,8 @@
 #define DANOAURAFACIL 2
 #define DANO AURADIFICIL 1
 
-#define VIDAZUMBI 1
-#define VIDATROLL 2
+#define VIDAZUMBI 2
+#define VIDATROLL 4
 
 #define UP_DIRECTION 1
 #define RIGHT_DIRECTION 2
@@ -466,7 +466,10 @@ void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado
     for(k=0; k<=quantinimigos; k++){
         if(inimigos[k].PosX>=(posx-reducaox) && inimigos[k].PosX<=(posx+aumentox)){
             if(inimigos[k].PosY>=(posy-reducaoy) && inimigos[k].PosY<=(posy+aumentoy)){
-                inimigos[k].vida--;
+                inimigos[k].vida = inimigos[k].vida - estado.Dificuldade.DanoDaAura;
+                if (estado.GreyskullAtivado == 1){
+                    inimigos[k].vida = 0;
+                }
             }
         }
     }
@@ -778,7 +781,7 @@ void Cheat_Code(int *covarde, int *greyskull)
         }
         else
         {
-            validacao = strcmp(cheatcode,"greyskull");//buff na aura
+            validacao = strcmp(cheatcode,"greyskull");//instakill com a aura
             if (validacao == 0)
             {
                 printf("\n Accepted type 2");
