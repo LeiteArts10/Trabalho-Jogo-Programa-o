@@ -524,7 +524,7 @@ void HideCursor()   //apaga o ponteiro
   SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor);
 }
 
-int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
+int Execucao(ESTADODEJOGO *estadodejogo){//execução de multiplas funções
     int I, j, k,l;
     int Menu = 0;
     ESTADODEJOGO estadoparamover;
@@ -612,7 +612,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
                     case 'D': Move(MapadoJogo, &Jogador, +1, 0, &Controle);
                             break;
                     case 'f':
-                    case 'F':   timeAtual = clock();
+                    case 'F':   timeAtual = clock();//controlador de recarga da aura
                                 if (timeAtual > timeUltimoUso + estadodejogo->Dificuldade.RecargaAura){
                                     Aura(MapadoJogo, &Jogador, *estadodejogo, QuantInimigos, Inimigos);
                                     timeUltimoUso = clock();
