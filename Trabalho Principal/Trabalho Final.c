@@ -12,7 +12,6 @@
 
 #define NUMERODEVIDASFACIL 3
 #define NUMERODEVIDASDIFICIL 1
-#define TAMANHOAURA 2
 #define DANOAURAFACIL 2
 #define DANOAURADIFICIL 1
 #define RECARGAFACIL 3000 //tempo em milisegundos para recarregar a aura magica
@@ -57,7 +56,7 @@
 #define COR_VAZIO 7
 #define COR_AURA 15
 
-#define MAXIMODEMONSTROS 15
+#define MAXIMODEMONSTROS 20
 
 typedef struct Dificuldade //definicoes de dificuldade
 {
@@ -129,10 +128,10 @@ void ConclusaoDificil() //Mensagem dada após terminar o jogo na dificuldade Dici
 {
     printf("\n\t\t\tParabens, Voce Venceu!!!\n\n");
 
-    printf("\tPor ter ganho o jogo no modo Dificil agora voce e digno de conhecer\n");
-    printf("\tnovos poderes capazes de manipular as leis do universo\n");
-    printf("\tPara acessa-los basta apertar a tecla apostrofe(') quando abrir o menu\n");
-    printf("\te dizer o seguinte:\n\t\tcovarde\t\t-\tPara ter vidas infinitas\n");
+    printf("\tPor ter ganho o jogo no modo Dificil agora voce e\n");
+    printf("\t digno de conhecer novos poderes capazes de manipular\n");
+    printf("\tas leis do universo. Para acessa-los basta apertar a\n");
+    printf("\ttecla apostrofe(') quando abrir o menue dizer o seguinte:\n\t\tcovarde\t\t-\tPara ter vidas infinitas\n");
     printf("\t\tgreyskull\t-\tPara aumentar o poder de sua aura magica\n");
 
     printf("\n\n\tMuito Obrigado por jogar, boa sorte em sua proxima aventura!\n");
@@ -151,11 +150,11 @@ int SelecionarDificuldade(){
     valido = 0;
     do{
         switch (nivelDeDificuldade){
-            case 1: printf("\n\tVoce selecionou dificuldade facil, voce tera 3 vidas para completar o jogo\nPressione qualquer tecla para continuar");
+            case 1: printf("\n\tVoce selecionou dificuldade facil, voce tera 3 \n\tvidas para completar o jogo.\n\tPressione enter para continuar");
                     valido = 1;
                     getch();
                     break;
-            case 2: printf("\n\tVoce selecionou a dificuldade dificil, voce tem apenas uma vida para completar o jogo e sua aura e mais fraca\nPressione qualquer tecla para continuar");
+            case 2: printf("\n\tVoce selecionou a dificuldade dificil, voce tem apenas \n\tuma vida para completar o jogo e sua aura e mais fraca\nPressione enter para continuar");
                     valido = 1;
                     getch();
                     break;
@@ -427,13 +426,9 @@ void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado
     else if(posx==2){
         reducaox=1;
     }
-    else if(posx==3){
+    else{
         reducaox=2;
     }
-    else{
-        reducaox=3;
-    }
-
 
     if(posy==1){
         reducaoy=0;
@@ -441,11 +436,8 @@ void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado
     else if(posy==2){
         reducaoy=1;
     }
-     else if(posy==3){
+     else{
         reducaoy=2;
-    }
-    else{
-        reducaoy=3;
     }
 
     if(posy==(LINHAS-2)){
@@ -454,11 +446,8 @@ void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado
     else if(posy==(LINHAS-3)){
         aumentoy=1;
     }
-     else if(posy==(LINHAS-4)){
+     else{
         aumentoy=2;
-    }
-    else{
-        aumentoy=3;
     }
 
     if(posx==(COLUNAS-2)){
@@ -467,11 +456,8 @@ void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado
     else if(posx==(COLUNAS-3)){
         aumentox=1;
     }
-     else if(posx==(COLUNAS-4)){
+     else{
         aumentox=2;
-    }
-    else{
-        aumentox=3;
     }
 
     for(i=(posx-reducaox);i<=(posx+aumentox);i++){
@@ -492,10 +478,6 @@ void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado
             }
         }
     }
-
-
-
-    //checar tempo restante até ser utilizada novamente
 
 }
 
@@ -729,6 +711,8 @@ int Carregamento(ESTADODEJOGO *Estado_de_Jogo){
     char NomeArquivoBin[TAMSTR+4];
 
     //ler ArquivosNomesdosSaves
+    clrscr();
+    gotoxy(5,5);
     if (!(ArquivoNomesDosSaves = fopen("ListaDeSaves.txt","r")))
     {
         printf("Erro de abertura lista de saves\n");
@@ -779,6 +763,8 @@ int Salvamento(ESTADODEJOGO *Estado_de_Jogo)
     char nomeDoSave[TAMSTR];
     char nomeArquivoMapa[TAMSTR+4];//mudar constantes por defines
     char nomeArquivoBin[TAMSTR+4];
+    clrscr();
+    gotoxy(5,5);
     printf("\nDigite o nome com que deseja salvar o arquivo: ");
     gets(nomeDoSave);
     ESTADODEJOGO EstadoSalvamento;
@@ -884,6 +870,7 @@ void LoopDeJogo(ESTADODEJOGO *Estado_de_Jogo, int Dificuldade){
         Estado_de_Jogo->MapaAtual++;
         }
         else if (retorno == 3){
+            gotoxy(20,10);
             printf("\n Abrindo Menu...\n");
         }
     }while(retorno==1);
