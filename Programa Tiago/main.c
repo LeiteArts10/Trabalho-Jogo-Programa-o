@@ -491,7 +491,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
 
     snprintf(nomeArquivo, sizeof nomeArquivo, "mapa%d.txt", estadodejogo->MapaAtual);//transforma numero mapa em string pra carregar diferentes mapas
 
-    while(estadodejogo->VidasRestantes >=1 && Colisao != 2  &&  Menu != 1)
+    while(estadodejogo->VidasRestantes >=0 && Colisao != 2  &&  Menu != 1)
     {
         if(LerMapa(nomeArquivo, MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS, &QuantInimigos, Inimigos, &Jogador))
         {

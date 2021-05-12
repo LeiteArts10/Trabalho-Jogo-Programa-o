@@ -44,9 +44,7 @@
 #define TROLL 'T'
 #define VAZIO ' '
 #define AURA 'O'
-#define CADAVER 'M'
 
-#define COR_CADAVER 8
 #define COR_PAREDE 8
 #define COR_OBSTACULO 2
 #define COR_JOGADOR 9
@@ -142,6 +140,24 @@ void ConclusaoDificil() //Mensagem dada após terminar o jogo na dificuldade Dici
 
 }
 
+void CalculoPontuacao(ESTADODEJOGO *estadodejogo, int tesouroColetado, int QuantInimigos, INIMIGO *Inimigos)
+{
+    int i;
+    //pontuação final do nivel
+    for(i=0;i<QuantInimigos;i++){
+        if (Inimigos[i].vida <=0){
+            if (Inimigos[i].Tipo == TIPO_TROLL){
+                estadodejogo->Pontuacao = estadodejogo->Pontuacao + MATOUTROLL;
+            }
+            if (Inimigos[i].Tipo == TIPO_ZUMBI){
+                estadodejogo->Pontuacao = estadodejogo->Pontuacao + MATOUZUMBI;
+            }
+        }
+    }
+    if (tesouroColetado ==1)
+        estadodejogo->Pontuacao = estadodejogo->Pontuacao + COLETOUTESOURO;
+}
+
 int SelecionarDificuldade(){
     int nivelDeDificuldade, valido;
     clrscr();
@@ -166,12 +182,12 @@ int SelecionarDificuldade(){
     }while (valido == 0);
     if (nivelDeDificuldade == 1){
         clrscr();
-        return 1;
     }
     else if (nivelDeDificuldade == 2){
         clrscr();
-        return 2;
     }
+
+    return nivelDeDificuldade;
 }
 
 void Menu(char *Selecaopont) // mostra menu e retorna resposta
@@ -268,8 +284,6 @@ int ControledeColisao(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador){  // ve
                             break;
         case(AURA): Cod = 6; //se a posição a ser ocupada é uma Aura ele retorna código 6 para a função de movimentação
                             break;
-        case(CADAVER): Cod = 7; break; //posição a ser ocupada é um cadaver
-        default: break;
     }
 
     return Cod;
@@ -402,20 +416,11 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
                                         MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = ZUMBI;
             }
             break;
-            case TIPO_MORTO: if(Inimigos[I].vida<=0){
-                                if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
-                                        MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
-                                }
-                                else if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] =! OBSTACULO){
-                                        MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = CADAVER;
-                                }
-            break;
-            }
         }
     }
 }
 
-void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado, int quantinimigos, INIMIGO inimigos[MAXIMODEMONSTROS]){
+void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, ESTADODEJOGO estado, int quantinimigos, INIMIGO *inimigos){
     int posx, posy, reducaox, reducaoy, aumentox, aumentoy, i, j, k;
     posx=Jogador->PosX;
     posy=Jogador->PosY;
@@ -508,8 +513,6 @@ void PintaMapa(char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas){   // 
                                          break;
                 case(AURA): Cor = COR_AURA; //serve pra corrigir problemas de um save em que o player acabou de usar a aura dele
                                          break;
-                case(CADAVER): Cor = COR_CADAVER;
-                                    break;
             }
             textbackground(Cor);
             gotoxy(X+1, Y+1);
@@ -533,6 +536,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//execução de multiplas funções
     int QuantInimigos;
     int Controle = 0;
     int Colisao=0;
+    int tesouroColetado=0;
     char Tecla = 'u';
     int timerint = 0;
     char nomeArquivo[10];
@@ -546,7 +550,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//execução de multiplas funções
 
     snprintf(nomeArquivo, sizeof nomeArquivo, "mapa%d.txt", estadodejogo->MapaAtual);//transforma numero mapa em string pra carregar diferentes mapas
 
-    while(estadodejogo->VidasRestantes >=1 && Colisao != 2  &&  Menu != 1)
+    do
     {
         if(LerMapa(nomeArquivo, MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS, &QuantInimigos, Inimigos, &Jogador))
         {
@@ -614,7 +618,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//execução de multiplas funções
                     case 'f':
                     case 'F':   timeAtual = clock();//controlador de recarga da aura
                                 if (timeAtual > timeUltimoUso + estadodejogo->Dificuldade.RecargaAura){
-                                    Aura(MapadoJogo, &Jogador, *estadodejogo, QuantInimigos, Inimigos);
+                                    Aura(MapadoJogo, &Jogador, *estadodejogo, QuantInimigos, &Inimigos);
                                     timeUltimoUso = clock();
                                 }
                             break;
@@ -639,19 +643,14 @@ int Execucao(ESTADODEJOGO *estadodejogo){//execução de multiplas funções
         {
             printf("Erro na leitura do mapa\n");
         }
-    }
+    }while(estadodejogo->VidasRestantes >=1 && Colisao != 2  &&  Menu != 1);
 
-    //pontuação final do nivel
-    for(l=0;l<QuantInimigos;l++){
-        if (Inimigos[l].vida <=0){
-            if (Inimigos[l].Tipo == TROLL){
-                estadodejogo->Pontuacao = estadodejogo->Pontuacao + MATOUTROLL;
-            }
-            if (Inimigos[l].Tipo == ZUMBI){
-                estadodejogo->Pontuacao = estadodejogo->Pontuacao + MATOUZUMBI;
-            }
-        }
+
+    if (Colisao == 2){
+        tesouroColetado =1;
     }
+    CalculoPontuacao(estadodejogo, tesouroColetado, QuantInimigos, Inimigos);
+
         clrscr();
         gotoxy(20,10);
         textcolor(BLACK);
@@ -662,9 +661,6 @@ int Execucao(ESTADODEJOGO *estadodejogo){//execução de multiplas funções
 
 
     if(Colisao == 2 ){
-            //IF VIDA DE TODOS OS MONSTROS == 0
-            //ELSE PRINTF("\nNAO EH SEGURO COLETAR O TESOURO\nAINDA HA MONSTROS VIVOS\n")
-
 
         clrscr();
         gotoxy(20,10);
@@ -673,7 +669,6 @@ int Execucao(ESTADODEJOGO *estadodejogo){//execução de multiplas funções
         textcolor(BLACK);
         Sleep(1200);//tempo de espera
         clrscr();
-
 
         testeproximomapa=estadodejogo->MapaAtual+1;
         snprintf(nomeArquivo, sizeof nomeArquivo, "mapa%d.txt", testeproximomapa);
@@ -761,7 +756,7 @@ int Salvamento(ESTADODEJOGO *Estado_de_Jogo)
     FILE *ArquivoNomesDosSaves;//arquivo com o nome de todos os saves
     FILE *ArquivoSave;//save especifico
     char nomeDoSave[TAMSTR];
-    char nomeArquivoMapa[TAMSTR+4];//mudar constantes por defines
+    char nomeArquivoMapa[TAMSTR+4];
     char nomeArquivoBin[TAMSTR+4];
     clrscr();
     gotoxy(5,5);
@@ -898,6 +893,7 @@ int main()
     Estado_de_Jogo.CovardeAtivado=0;
     Estado_de_Jogo.GreyskullAtivado=0;
     Estado_de_Jogo.MapaAtual=0;
+    Estado_de_Jogo.Pontuacao = 0;
 
     Introducao();//ARRUMAR CORES
     while(Sair==0)
@@ -919,6 +915,7 @@ int main()
 
                         Estado_de_Jogo.VidasRestantes = Estado_de_Jogo.Dificuldade.VidasIniciais;
                         Estado_de_Jogo.MapaAtual=mapainicial;
+                        Estado_de_Jogo.Pontuacao = 0;
 
                     LoopDeJogo(&Estado_de_Jogo, Dificuldade);
 
