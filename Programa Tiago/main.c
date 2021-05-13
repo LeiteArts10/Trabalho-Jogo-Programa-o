@@ -84,6 +84,7 @@ typedef struct Estado_de_Jogo //definições do estado de jogo, usado para escreve
     int MapaAtual;
     DIFICULDADE Dificuldade;
     int RecargaAura; //tempo até poder usar a aura novamente
+	char MapadoJogo[LINHAS][COLUNAS];
 
     //trapaças
     int CovardeAtivado;     //0-desativado      1-ativado
@@ -188,7 +189,7 @@ void Menu(char *Selecaopont) // mostra menu e retorna resposta
     clrscr();
     }
 
-int LerMapa(char *NomedoMapa, char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas, int MaximodeInimigos, int *QuantInimigos, INIMIGO *Inimigo, PLAYER *Jogador){  //le e transforma em matriz, atribui as posicoes do jogador e inimigos, controla o numero
+int LerMapa(char *NomedoMapa, ESTADODEJOGO *Estado_de_Jogo, int Linhas, int Colunas, int MaximodeInimigos, int *QuantInimigos, INIMIGO *Inimigo, PLAYER *Jogador){  //le e transforma em matriz, atribui as posicoes do jogador e inimigos, controla o numero
     int I,J;
     FILE *Arquivo;
     int Status = 0;
@@ -199,8 +200,8 @@ int LerMapa(char *NomedoMapa, char MapadoJogo[LINHAS][COLUNAS], int Linhas, int 
         {
             for (J=0; J<Colunas; J++)
             {
-                MapadoJogo[I][J]= getc(Arquivo);
-                switch(MapadoJogo[I][J]){
+                Estado_de_Jogo->MapadoJogo[I][J] = getc(Arquivo);
+                switch(Estado_de_Jogo->MapadoJogo[I][J]){
                     case 'z'://ZUMBI
                     case 'Z': if(*QuantInimigos<=MaximodeInimigos){
                               Inimigo[*QuantInimigos].PosX = J;
@@ -242,11 +243,11 @@ int LerMapa(char *NomedoMapa, char MapadoJogo[LINHAS][COLUNAS], int Linhas, int 
     return Status;
 }
 
-int ControledeColisao(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador){  // verifica se vai haver colisao e informa o tipo
+int ControledeColisao(ESTADODEJOGO *Estado_de_Jogo, PLAYER *Jogador){  // verifica se vai haver colisao e informa o tipo
 
     int Cod = 5;
 
-    switch(MapadoJogo[Jogador -> PosY][Jogador -> PosX]){
+    switch(Estado_de_Jogo->MapadoJogo[Jogador -> PosY][Jogador -> PosX]){
         case(PAREDE): Cod = 0; //se a posição a ser ocupada pelo jogador é uma parade ele retorna um código 0 para a função de movimentação
                            break;
 
@@ -269,36 +270,36 @@ int ControledeColisao(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador){  // ve
     return Cod;
 }
 
-void Move(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador, int X, int Y, int *Controle){  // move jogador, se colisao retorna
+void Move(ESTADODEJOGO *Estado_de_Jogo, PLAYER *Jogador, int X, int Y, int *Controle){  // move jogador, se colisao retorna
 
-     MapadoJogo[Jogador -> PosY][Jogador -> PosX] = VAZIO;
+     Estado_de_Jogo->MapadoJogo[Jogador -> PosY][Jogador -> PosX] = VAZIO;
     (Jogador -> PosY) = (Jogador -> PosY) + Y;
     (Jogador -> PosX) = (Jogador -> PosX) + X;
 
-    switch(ControledeColisao(MapadoJogo, Jogador)){
+    switch(ControledeColisao(Estado_de_Jogo->MapadoJogo, Jogador)){
         case 0: (Jogador -> PosY) = (Jogador -> PosY) - Y;
                 (Jogador -> PosX) = (Jogador -> PosX) - X;
-                MapadoJogo[Jogador -> PosY][Jogador -> PosX] = JOGADOR;
+                Estado_de_Jogo->MapadoJogo[Jogador -> PosY][Jogador -> PosX] = JOGADOR;
                  break;
 
         case 1: *Controle = 1;
-                MapadoJogo[Jogador -> PosY][Jogador -> PosX] = OBSTACULO;
+                Estado_de_Jogo->MapadoJogo[Jogador -> PosY][Jogador -> PosX] = OBSTACULO;
                 break;
 
-        case 2: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = TESOURO;
+        case 2: Estado_de_Jogo->MapadoJogo[Jogador -> PosY][Jogador -> PosX] = TESOURO;
                 break;
 
         case 3: *Controle = 1;
-                MapadoJogo[Jogador -> PosY][Jogador -> PosX] = ZUMBI;
+                Estado_de_Jogo->MapadoJogo[Jogador -> PosY][Jogador -> PosX] = ZUMBI;
                 break;
 
         case 4: *Controle = 1;
-                MapadoJogo[Jogador ->PosY][Jogador -> PosX] = TROLL;
+                Estado_de_Jogo->MapadoJogo[Jogador ->PosY][Jogador -> PosX] = TROLL;
                 break;
 
-        case 5: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = JOGADOR;
+        case 5: Estado_de_Jogo->MapadoJogo[Jogador -> PosY][Jogador -> PosX] = JOGADOR;
                 break;
-        case 6: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = AURA;
+        case 6: Estado_de_Jogo->MapadoJogo[Jogador -> PosY][Jogador -> PosX] = AURA;
     }
 
 }
@@ -314,7 +315,7 @@ int SelecionaDirecao(){  // selecione direcao do monstro
 }
 
 
-void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMONSTROS], int Quant, PLAYER *Jogador, int *Controle, ESTADODEJOGO *estadodejogo){
+void MoveInimigos(ESTADODEJOGO *Estado_de_Jogo, INIMIGO Inimigos[MAXIMODEMONSTROS], int Quant, PLAYER *Jogador, int *Controle, ESTADODEJOGO *estadodejogo){
 
     int I, X = 0, Y = 0;
     char Simbolo;
@@ -345,39 +346,39 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
                     Y = 0;
                     break;
         }
-        Simbolo = MapadoJogo[Inimigos[I].PosY + Y][Inimigos[I].PosX + X];
+        Simbolo = Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY + Y][Inimigos[I].PosX + X];
         if((Simbolo == OBSTACULO && Inimigos[I].Tipo == TIPO_TROLL) || (Inimigos[I].steps > 4) || Simbolo == PAREDE){
             while(Inimigos[I].Direcao == rand()%4){
                 Inimigos[I].Direcao = rand()%4;
             }
             Inimigos[I].steps = 0;
         }
-        else if(Inimigos[I].Tipo == TIPO_ZUMBI && MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == OBSTACULO){
+        else if(Inimigos[I].Tipo == TIPO_ZUMBI && Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == OBSTACULO){
 
-            MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = OBSTACULO;
+            Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = OBSTACULO;
             (Inimigos[I].PosY) = (Inimigos[I].PosY) + Y;
             (Inimigos[I].PosX) = (Inimigos[I].PosY) + X;
             Inimigos[I].steps = Inimigos[I].steps + 1;
         }
-        else if((Inimigos[I].Tipo == TIPO_ZUMBI && MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO) || (Inimigos[I].Tipo == TIPO_ZUMBI && MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO)){
-            MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
+        else if((Inimigos[I].Tipo == TIPO_ZUMBI && Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO) || (Inimigos[I].Tipo == TIPO_ZUMBI && Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO)){
+            Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
             (Inimigos[I].PosY) = (Inimigos[I].PosY) + Y;
             (Inimigos[I].PosX) = (Inimigos[I].PosX) + X;
             Inimigos[I].steps = Inimigos[I].steps + 1;
 
         }
-        else if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == MapadoJogo[Jogador -> PosY][Jogador -> PosX]){
+        else if(Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == Estado_de_Jogo->MapadoJogo[Jogador -> PosY][Jogador -> PosX]){
             *Controle = 1;
             switch(Inimigos[I].Tipo){
-                case TIPO_TROLL: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = TROLL;
+                case TIPO_TROLL: Estado_de_Jogo->MapadoJogo[Jogador -> PosY][Jogador -> PosX] = TROLL;
                                        break;
-                case TIPO_ZUMBI: MapadoJogo[Jogador -> PosY][Jogador -> PosX] = ZUMBI;
+                case TIPO_ZUMBI: Estado_de_Jogo->MapadoJogo[Jogador -> PosY][Jogador -> PosX] = ZUMBI;
                                         break;
             }
 
         }
         else{
-            MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = VAZIO;
+            Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = VAZIO;
             (Inimigos[I].PosY) = (Inimigos[I].PosY) + Y;
             (Inimigos[I].PosX) = (Inimigos[I].PosX) + X;
             Inimigos[I].steps = Inimigos[I].steps + 1;
@@ -385,22 +386,22 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
 
 
         switch(Inimigos[I].Tipo){
-            case TIPO_TROLL: if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
-                                        MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
+            case TIPO_TROLL: if(Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
+                                        Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
                                     }
-                                   MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TROLL;
+                                   Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TROLL;
                                    break;
-            case TIPO_ZUMBI: if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
-                                        MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
+            case TIPO_ZUMBI: if(Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
+                                        Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
                                     }
-                                    else if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] != OBSTACULO)
-                                        MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = ZUMBI;
+                                    else if(Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] != OBSTACULO)
+                                        Estado_de_Jogo->MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = ZUMBI;
                                     break;
         }
     }
 }
 
-void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador)
+void Aura(char *MapadoJogo, PLAYER *Jogador)
 {
     int recarga;//recarga em segundos, varia de acordo com dificuldade selecionada
     int dano; //dano implicado aos inimigos, varia com dificuldade ou trapaça
@@ -419,11 +420,11 @@ void Aura(char MapadoJogo[LINHAS][COLUNAS], PLAYER *Jogador)
 
 }
 
-void PintaMapa(char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas){   // imprime o mapa
+void PintaMapa(ESTADODEJOGO *Estado_de_Jogo, int Linhas, int Colunas){   // imprime o mapa
     int X, Y, Cor;
     for(X=0; X<Colunas; X++){
         for(Y=0; Y<Linhas; Y++){
-            switch(MapadoJogo[Y][X]){
+            switch(Estado_de_Jogo->MapadoJogo[Y][X]){
                 case(PAREDE): Cor = COR_PAREDE;
                                    break;
 
@@ -454,7 +455,7 @@ void PintaMapa(char MapadoJogo[LINHAS][COLUNAS], int Linhas, int Colunas){   // 
     }
 }
 
-void SalvamentoTemp(char MapadoJogo, ESTADODEJOGO Estado_de_Jogo)//exporta estado atual do mapa para arquivo texto e ESTADO DE JOGO para arquivo binario
+void SalvamentoTemp(char *MapadoJogo, ESTADODEJOGO Estado_de_Jogo)//exporta estado atual do mapa para arquivo texto e ESTADO DE JOGO para arquivo binario
 {
 
     //fopen(mapa temp)//escreve em arquivo txt o estado atual do mapa
@@ -475,7 +476,6 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
     int Menu = 0;
     ESTADODEJOGO estadoparamover;
     int testeproximomapa;
-    char MapadoJogo[LINHAS][COLUNAS];
     int QuantInimigos;
     int Controle = 0;
     int Colisao=0;
@@ -493,9 +493,9 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
 
     while(estadodejogo->VidasRestantes >=0 && Colisao != 2  &&  Menu != 1)
     {
-        if(LerMapa(nomeArquivo, MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS, &QuantInimigos, Inimigos, &Jogador))
+        if(LerMapa(nomeArquivo, estadodejogo->MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS, &QuantInimigos, Inimigos, &Jogador))
         {
-            PintaMapa(MapadoJogo, LINHAS, COLUNAS);
+            PintaMapa(estadodejogo->MapadoJogo, LINHAS, COLUNAS);
             HideCursor();
 
             if(Controle == 1)
@@ -515,7 +515,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
             {
                 Inimigos[I].Direcao = SelecionaDirecao();
             }
-            while((Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 1 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 2 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 3 && (Colisao = (ControledeColisao(MapadoJogo, &Jogador))) != 4  && Menu != 1)
+            while((Colisao = (ControledeColisao(estadodejogo->MapadoJogo, &Jogador))) != 1 && (Colisao = (ControledeColisao(estadodejogo->MapadoJogo, &Jogador))) != 2 && (Colisao = (ControledeColisao(estadodejogo->MapadoJogo, &Jogador))) != 3 && (Colisao = (ControledeColisao(estadodejogo->MapadoJogo, &Jogador))) != 4  && Menu != 1)
             {
                 if(kbhit())
                 {
@@ -528,34 +528,34 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
                 timerend = clock();
                 if(((float)(timerend - timer)/ CLOCKS_PER_SEC)>0.2)
                 {
-                    MoveInimigos(MapadoJogo, Inimigos, QuantInimigos, &Jogador, &Controle, &estadoparamover);
+                    MoveInimigos(estadodejogo->MapadoJogo, Inimigos, QuantInimigos, &Jogador, &Controle, &estadoparamover);
                     timerint++;
                     timer = clock();
                 }
                 switch(Tecla)
                 {   case 'w':
-                    case 'W': Move(MapadoJogo, &Jogador, 0, -1, &Controle);
+                    case 'W': Move(estadodejogo->MapadoJogo, &Jogador, 0, -1, &Controle);
                             break;
                     case 'a':
-                    case 'A': Move(MapadoJogo, &Jogador, -1, 0, &Controle);
+                    case 'A': Move(estadodejogo->MapadoJogo, &Jogador, -1, 0, &Controle);
                             break;
                     case 's':
-                    case 'S': Move(MapadoJogo, &Jogador, 0, +1, &Controle);
+                    case 'S': Move(estadodejogo->MapadoJogo, &Jogador, 0, +1, &Controle);
                             break;
                     case 'd':
-                    case 'D': Move(MapadoJogo, &Jogador, +1, 0, &Controle);
+                    case 'D': Move(estadodejogo->MapadoJogo, &Jogador, +1, 0, &Controle);
                             break;
                     case 'f':
-                    case 'F': Aura(MapadoJogo, &Jogador);
+                    case 'F': Aura(estadodejogo->MapadoJogo, &Jogador);
                             break;
                     case 9 : Menu=1;
                             clrscr();
                             return 3;//código de retorno aqui ou o programa buga, e passa as fazes adiante quando se aperta TAB
-                             //SalvamentoTemp(MapadoJogo, %Jogador.Vidas);
+                             //SalvamentoTemp(Estado_de_Jogo->MapadoJogo, %Jogador.Vidas);
                             break;
 
                 }
-                PintaMapa(MapadoJogo, LINHAS, COLUNAS);
+                PintaMapa(estadodejogo->MapadoJogo, LINHAS, COLUNAS);
 
             }
         }
@@ -577,7 +577,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//mudar parametros para ESTADO DE JOGO
 
         testeproximomapa=estadodejogo->MapaAtual+1;
         snprintf(nomeArquivo, sizeof nomeArquivo, "mapa%d.txt", testeproximomapa);
-        if(LerMapa(nomeArquivo, MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS, &QuantInimigos, Inimigos, &Jogador)){
+        if(LerMapa(nomeArquivo, estadodejogo->MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS, &QuantInimigos, Inimigos, &Jogador)){
             return 1;
         }
         else{
@@ -735,7 +735,6 @@ int retorno;
 
 int main()
     {
-    char MapadoJogo[LINHAS][COLUNAS];
     int Sair=0;
     char Selecao;
     int mapainicial=0;
