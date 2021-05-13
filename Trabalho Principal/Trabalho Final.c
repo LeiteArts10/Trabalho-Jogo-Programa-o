@@ -107,9 +107,10 @@ void Introducao()// mensagem de introducao
      clrscr();
 }
 
-void ConclusaoNormal()  //Mensagem dada após terminar o jogo na dificuldade padrao
+void ConclusaoNormal(ESTADODEJOGO *Estado_de_Jogo)  //Mensagem dada após terminar o jogo na dificuldade padrao
 {
      printf("\n\t\t\tParabens, Voce Venceu!!!\n\n");
+     printf("\tSua pontuacao final foi: %d\n", Estado_de_Jogo->Pontuacao);
      printf("\tVoce recuperou o tesouro de seu povo e agora \n\tsua cidade podera viver em paz\n\n");
      printf("\tSe desejar, pode reviver sua aventura jogando \n\tcom uma outra dificuldade\n");
      printf("\n\tAperte qualquer tecla para ir ao menu");
@@ -118,9 +119,10 @@ void ConclusaoNormal()  //Mensagem dada após terminar o jogo na dificuldade padr
      clrscr();
 }
 
-void ConclusaoDificil() //Mensagem dada após terminar o jogo na dificuldade Dicifil
+void ConclusaoDificil(ESTADODEJOGO *Estado_de_Jogo) //Mensagem dada após terminar o jogo na dificuldade Dicifil
 {
     printf("\n\t\t\tParabens, Voce Venceu!!!\n\n");
+    printf("\tSua pontuacao final foi: %d\n", Estado_de_Jogo->Pontuacao);
     printf("\tPor ter ganho o jogo no modo Dificil agora voce e\n");
     printf("\t digno de conhecer novos poderes capazes de manipular\n");
     printf("\tas leis do universo. Para acessa-los basta apertar a\n");
@@ -869,10 +871,10 @@ void LoopDeJogo(ESTADODEJOGO *Estado_de_Jogo, int Dificuldade){
     }while(retorno==1);
     if(retorno==2){
         if(Dificuldade==1){
-            ConclusaoNormal();
+            ConclusaoNormal(Estado_de_Jogo);
         }
         else{
-            ConclusaoDificil();
+            ConclusaoDificil(Estado_de_Jogo);
         }
     }
 }
