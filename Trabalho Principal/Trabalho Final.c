@@ -31,7 +31,8 @@
 
 #define TIPO_ZUMBI 5
 #define TIPO_TROLL 6
-#define TIPO_MORTO 7
+#define TIPO_ZUMBI_MORTO 7
+#define TIPO_TROLL_MORTO 8
 
 #define COLUNAS 60
 #define LINHAS 23
@@ -44,8 +45,10 @@
 #define TROLL 'T'
 #define VAZIO ' '
 #define AURA 'O'
+#define CADAVER 'M'
 
 #define COR_PAREDE 8
+#define COR_CADAVER 8
 #define COR_OBSTACULO 2
 #define COR_JOGADOR 9
 #define COR_TESOURO 14
@@ -140,23 +143,20 @@ void ConclusaoDificil() //Mensagem dada após terminar o jogo na dificuldade Dici
 
 }
 
-void CalculoPontuacao(ESTADODEJOGO *estadodejogo, int tesouroColetado, int QuantInimigos, INIMIGO *Inimigos)
-{
-    int i;
-    //pontuação final do nivel
-    for(i=0;i<QuantInimigos;i++){
-        if (Inimigos[i].vida <=0){
-            if (Inimigos[i].Tipo == TIPO_TROLL){
-                estadodejogo->Pontuacao = estadodejogo->Pontuacao + MATOUTROLL;
-            }
-            if (Inimigos[i].Tipo == TIPO_ZUMBI){
-                estadodejogo->Pontuacao = estadodejogo->Pontuacao + MATOUZUMBI;
-            }
+int calculapontuacao(INIMIGO *inimigos, int tesouroColetado){
+    int pontos=0, i;
+    for(i=0; i<=MAXIMODEMONSTROS; i++){
+        if(inimigos[i].Tipo==TIPO_TROLL_MORTO){
+            pontos=pontos+MATOUTROLL;
+        }
+        if(inimigos[i].Tipo==TIPO_ZUMBI_MORTO){
+            pontos=pontos+MATOUZUMBI;
         }
     }
     if (tesouroColetado ==1)
-        estadodejogo->Pontuacao = estadodejogo->Pontuacao + COLETOUTESOURO;
-}
+        pontos = pontos + COLETOUTESOURO;
+    return pontos;
+    }
 
 int SelecionarDificuldade(){
     int nivelDeDificuldade, valido;
@@ -350,10 +350,19 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
                 }
         }
         else {
-            Inimigos[I].Tipo = TIPO_MORTO;
-            Inimigos[I].PosX = 0;
-            Inimigos[I].PosY = 0;
-            Inimigos[I].steps = 0;
+            if(Inimigos[I].Tipo==TIPO_TROLL ){
+                Inimigos[I].Tipo = TIPO_TROLL_MORTO;
+                Inimigos[I].PosX = COLUNAS;
+                Inimigos[I].PosY = LINHAS;
+                Inimigos[I].steps = 0;
+            }
+            if(Inimigos[I].Tipo==TIPO_ZUMBI ){
+                Inimigos[I].Tipo = TIPO_ZUMBI_MORTO;
+                Inimigos[I].PosX = COLUNAS;
+                Inimigos[I].PosY = LINHAS;
+                Inimigos[I].steps = 0;
+            }
+
         }
         Simbolo = MapadoJogo[Inimigos[I].PosY + Y][Inimigos[I].PosX + X];
         if((Simbolo == OBSTACULO && Inimigos[I].Tipo == TIPO_TROLL && Inimigos[I].vida>0) || (Inimigos[I].steps > 4) || Simbolo == PAREDE){
@@ -376,7 +385,7 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
             Inimigos[I].steps = Inimigos[I].steps + 1;
 
         }
-        else if((Simbolo == OBSTACULO && Inimigos[I].Tipo == TIPO_MORTO && Inimigos[I].vida<=0) || (Inimigos[I].steps > 4) || Simbolo == PAREDE){
+        else if((Simbolo == OBSTACULO && (Inimigos[I].Tipo == TIPO_TROLL_MORTO || Inimigos[I].Tipo == TIPO_ZUMBI_MORTO) && Inimigos[I].vida<=0) || (Inimigos[I].steps > 4) || Simbolo == PAREDE){
             while(Inimigos[I].Direcao == rand()%4){
                 Inimigos[I].Direcao = rand()%4;
             }
@@ -416,6 +425,24 @@ void MoveInimigos(char MapadoJogo[LINHAS][COLUNAS], INIMIGO Inimigos[MAXIMODEMON
                                         MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = ZUMBI;
             }
             break;
+            case TIPO_TROLL_MORTO: if(Inimigos[I].vida<=0){
+                                if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
+                                        MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
+                                }
+                                else if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] =! OBSTACULO){
+                                        MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = CADAVER;
+                                }
+            break;
+            }
+            case TIPO_ZUMBI_MORTO: if(Inimigos[I].vida<=0){
+                                if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] == TESOURO){
+                                        MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = TESOURO;
+                                }
+                                else if(MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] =! OBSTACULO){
+                                        MapadoJogo[Inimigos[I].PosY][Inimigos[I].PosX] = CADAVER;
+                                }
+            break;
+            }
         }
     }
 }
@@ -649,7 +676,7 @@ int Execucao(ESTADODEJOGO *estadodejogo){//execução de multiplas funções
     if (Colisao == 2){
         tesouroColetado =1;
     }
-    CalculoPontuacao(estadodejogo, tesouroColetado, QuantInimigos, Inimigos);
+    estadodejogo->Pontuacao = estadodejogo->Pontuacao + calculapontuacao(Inimigos, tesouroColetado);
 
         clrscr();
         gotoxy(20,10);
@@ -670,8 +697,9 @@ int Execucao(ESTADODEJOGO *estadodejogo){//execução de multiplas funções
         Sleep(1200);//tempo de espera
         clrscr();
 
-        testeproximomapa=estadodejogo->MapaAtual+1;
+        testeproximomapa = estadodejogo->MapaAtual+1;
         snprintf(nomeArquivo, sizeof nomeArquivo, "mapa%d.txt", testeproximomapa);
+
         if(LerMapa(nomeArquivo, MapadoJogo, LINHAS, COLUNAS, MAXIMODEMONSTROS, &QuantInimigos, Inimigos, &Jogador)){
             return 1;
         }
@@ -736,9 +764,12 @@ int Carregamento(ESTADODEJOGO *Estado_de_Jogo){
 
         if(fread(&EstadoArquivo,sizeof(ESTADODEJOGO),1,SaveBinEscolhido) == 1)
         {
-            printf("teste vidas restantes arquivo: %d\n", EstadoArquivo.VidasRestantes);
+            printf("vidas restantes: %d\n", EstadoArquivo.VidasRestantes);
             printf("mapa atual: %d\n", EstadoArquivo.MapaAtual);
+            printf("pontuacao: %d\n", EstadoArquivo.Pontuacao);
             getchar();
+
+        *Estado_de_Jogo = EstadoArquivo;
         }
         else{
             printf("Erro na leitura de save binario!!\n");
